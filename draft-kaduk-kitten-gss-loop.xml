@@ -24,7 +24,7 @@
       <t>This document specifies the generic structure of the negotiation
 	loop to establish a GSS security context between initiator and
 	acceptor.  The control flow of the loop is indicated for both
-	parties, including error conditions, and indications are given
+	parties, including error conditions, and indications are given for
 	where application-specific behavior must be specified.
       </t>
     </abstract>
@@ -77,7 +77,7 @@
 	</t>
       </section>
     </section>
-    <section anchor="loop" title="Loop structure">
+    <section anchor="loop" title="Loop Structure">
       <t>The loop is begun by the appropriately named initiator,
 	which calls GSS_Init_sec_context() with an empty (zero-length)
 	input_token and a fixed set of input flags containing the
@@ -96,7 +96,7 @@
 	to GSS_Init_sec_context() or GSS_Accept_sec_context() is the
 	first such call in the loop.  For the first call to each
 	routine in the loop, the major status code from the previous
-	call to GSS_Init_sec_context() (GSS_Accept_sec_context()) should
+	call to GSS_Init_sec_context() or GSS_Accept_sec_context() should
 	be taken as GSS_S_CONTINUE_NEEDED.
       </t>
       <section anchor="anon" title="Anonymous Initiators">
@@ -125,7 +125,7 @@
 	      further actions.</t>
 	    <t>If the major status code is GSS_S_COMPLETE and the
 	      output_token is nonempty, then the initiator's portion
-	      of the security context negotiation is compete but the
+	      of the security context negotiation is complete but the
 	      acceptor's is not.  The initiator MUST send the output_token
 	      to the acceptor so that the acceptor can establish its half
 	      of the security context.</t>
@@ -151,15 +151,15 @@
 	</t>
       </section>
       <section anchor="itoa" title="Sending from Initiator to Acceptor">
-	<t>The estableshment of a GSS security context between initiator
-	  and acceptor requires some communications channel by which to
+	<t>The establishment of a GSS security context between initiator
+	  and acceptor requires some communication channel by which to
 	  exchange the context negotiation tokens.  The nature of this
 	  channel is not specified by the GSS specification -- it could
 	  be a synchronous TCP channel, a UDP-based RPC protocol, or
 	  any other sort of channel.  In many cases, the channel will
 	  be multiplexed with non-GSS application data; the application
-	  protocol must provide some means by which the GSS tokens can
-	  be identified and passed through to the mechanism accordingly.
+	  protocol must provide some means by which the GSS context tokens
+	  can be identified and passed through to the mechanism accordingly.
 	  It is in such cases where the application protocol has a means
 	  to indicate error conditions that the initiator could indicate
 	  a failure to the acceptor, as mentioned in some of the above
@@ -171,7 +171,7 @@
 	  no need for the initiator to explicitly indicate its failure
 	  to the acceptor.  Conditions such as this can be treated in
 	  individual application protocol specifications.</t>
-	<t>If an regular security context output_token is produced by the
+	<t>If a regular security context output_token is produced by the
 	  call to GSS_Init_sec_context(), the initiator MUST transmit
 	  this token to the acceptor over the application's communication
 	  channel.  If the call to GSS_Init_sec_context() returns an
@@ -187,7 +187,7 @@
 	  may find it useful to perform some sanity checks on the
 	  state of the negotiation loop.</t>
 	<t>If the acceptor receives a context token but was not expecting
-	  such a token (e.g., if the acceptor's previous call to
+	  such a token (for example, if the acceptor's previous call to
 	  GSS_Accept_sec_context() returned GSS_S_COMPLETE), this is
 	  an error condition indicating that the initiator's state is invalid.
 	  It is likely appropriate for the acceptor to report this error
@@ -210,7 +210,7 @@
 	  as such, there should always be a nonempty input_token
 	  to calls to GSS_Accept_sec_context().  The input_context_handle
 	  parameter will always be given as the output_context_handle
-	  from the previous call to GSS_Accept_sec_context() in the
+	  from the previous call to GSS_Accept_sec_context() in a
 	  given negotiation loop (or GSS_C_NO_CONTEXT on the first
 	  call), but the acceptor_cred_handle and chan_bindings arguments
 	  MUST remain fixed over the course of a given GSS negotiation
@@ -227,7 +227,7 @@
 	      further actions.</t>
 	    <t>If the major status code is GSS_S_COMPLETE and the
 	      output_token is nonempty, then the acceptor's portion
-	      of the security context negotiation is compete but the
+	      of the security context negotiation is complete but the
 	      initiator's is not.  The acceptor MUST send the output_token
 	      to the initiator so that the initiator can establish its half
 	      of the security context.</t>
@@ -258,14 +258,15 @@
 	  between the two parties.  For a synchronous bidirectional channel,
 	  it can be just another piece of data sent over the link, but for
 	  a stateless UDP RPC acceptor, the token will probably end up
-	  being sent as an RPC output parameter.</t>
+	  being sent as an RPC output parameter.  Application protocol
+	  specifications will need to specify the nature of this behavior.</t>
         <t>If the application protocol has the initiator driving the
 	  application's control flow (with the acceptor just responding to
 	  actions from the initiator), it is particularly helpful for
-	  the acceptor to indicate a failure to the acceptor, as mentioned
+	  the acceptor to indicate a failure to the initiator, as mentioned
 	  in some of the above cases conditional on "an appropriate channel
 	  to do so".</t>
-	<t>If an regular security context output_token is produced by the
+	<t>If a regular security context output_token is produced by the
 	  call to GSS_Accept_sec_context(), the acceptor MUST transmit
 	  this token to the initiator over the application's communication
 	  channel.  If the call to GSS_Accept_sec_context() returns an
@@ -281,7 +282,7 @@
 	  may find it useful to perform some sanity checks on the state
 	  of the negotiation loop.</t>
 	<t>If the initiator receives a context token but was not expecting
-	  such a token (that is, the initiator's previous call to
+	  such a token (for example, if the initiator's previous call to
 	  GSS_Init_sec_context() returned GSS_S_COMPLETE), this is an
 	  error condition indicating that the acceptor's state is invalid.
 	  It may be appropriate for the initiator to report this error
@@ -306,7 +307,7 @@
 	</t>
       </section>
     </section>
-    <section anchor="post" title="After Security Contex Negotiation">
+    <section anchor="post" title="After Security Context Negotiation">
       <t>Once a party has completed its half of the security context
 	and fulfilled its obligations to the other party, the context
 	is complete, but it is not necessarily ready and appropriate
@@ -322,7 +323,7 @@
 	verify the values of the deleg_state, mutual_state, replay_det_state,
 	sequence_state, conf_avail, and integ_avail flags
 	from the last call to GSS_Init_sec_context()
-	that correspond to the requested flags.  If a flag was requested
+	corresponding to the requested flags.  If a flag was requested
 	but is not available, and that feature is necessary for the
 	appplication protocol, the initiator MUST destroy the security
 	context and not use the security context for application traffic.</t>
