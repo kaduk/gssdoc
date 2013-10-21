@@ -10,7 +10,7 @@
 <!ENTITY RFC4752 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4752.xml">
 <!ENTITY RFC4401 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml">
 ]>
-<rfc category="info" ipr="trust200902" docName="draft-kaduk-kitten-gss-loop-00" submissionType="IETF">
+<rfc category="std" ipr="trust200902" docName="draft-kaduk-kitten-gss-loop-00" submissionType="IETF">
   <front>
     <title>Structure of the GSS Negotiation Loop</title>
     <author initials="B." surname="Kaduk" fullname="Benjamin Kaduk">
