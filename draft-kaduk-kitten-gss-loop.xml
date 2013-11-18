@@ -356,6 +356,37 @@
 	  conf_state output of GSS_Wrap() (if GSS_Wrap() is used).
 	</t>
       </section>
+      <section anchor="extra-token" title="Additional Context Tokens">
+	<t>Under some (rare) conditions, a context token will be received
+	  by a party to a security context negotiation after that party has 
+	  completed the negotiation (i.e., after GSS_Init_sec_context()
+	  or GSS_Accept_sec_context() has returned GSS_S_COMPLETE).
+	  Such tokens must be passed to GSS_Process_context_token() for
+	  processing.
+	</t>
+	<t>The most common cause of such tokens is security context deletion
+	  tokens, emitted when the remote party called GSS_Delete_sec_context()
+	  with a non-null output_context_token parameter.  With the GSS-API
+	  version 2, it is not recommended to use security context deletion
+	  tokens.
+	</t>
+	<t>Extra security context tokens can also be emitted if the selected
+	  mechanism specifies some functionality (such as per-message
+          confidentiality protection) as optional-to-implement, and the
+	  acceptor's implementation does not implement the optional functionality,
+	  but the functionality was requested by the initiator.  In this case,
+	  the acceptor's GSS implementation is required to emit at least one
+	  context token (even when one would not otherwise be needed to complete
+	  the context negotiation), and this can result in an "extra" token.
+	</t>
+	<t>In the rare case when an application receives an extra context token,
+	  GSS_Inquire_context() should be used after processing the extra token
+	  to re-verify that the context does support the features necessary
+	  for the application protocol.  This will also indicate whether the
+	  token was a deletion token, in which case the major status will be
+	  GSS_S_NO_CONTEXT.
+	</t>
+      </section>
     </section>
   </middle>
   <back>
