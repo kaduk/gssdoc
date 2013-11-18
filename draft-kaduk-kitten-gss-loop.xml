@@ -195,8 +195,9 @@
 	  state of the negotiation loop.</t>
 	<t>If the acceptor receives a context token but was not expecting
 	  such a token (for example, if the acceptor's previous call to
-	  GSS_Accept_sec_context() returned GSS_S_COMPLETE), this is
+	  GSS_Accept_sec_context() returned GSS_S_COMPLETE), this is probably
 	  an error condition indicating that the initiator's state is invalid.
+	  See <xref target="extra-token" /> for some exceptional cases.
 	  It is likely appropriate for the acceptor to report this error
 	  condition to the acceptor via the application's communication
 	  channel.</t>
@@ -296,8 +297,9 @@
 	  of the negotiation loop.</t>
 	<t>If the initiator receives a context token but was not expecting
 	  such a token (for example, if the initiator's previous call to
-	  GSS_Init_sec_context() returned GSS_S_COMPLETE), this is an
+	  GSS_Init_sec_context() returned GSS_S_COMPLETE), this is probably an
 	  error condition indicating that the acceptor's state is invalid.
+	  See <xref target="extra-token" /> for some exceptional cases.
 	  It may be appropriate for the initiator to report this error
 	  condition to the acceptor via the application's communication
 	  channel.</t>
