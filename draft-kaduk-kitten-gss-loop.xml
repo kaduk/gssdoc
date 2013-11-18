@@ -403,6 +403,29 @@
 	</t>
       </section>
     </section>
+    <section anchor="samples" title="Sample Code">
+      <t>This section gives sample code for the GSS negotiation loop of
+	a regular application and an application where the initiator
+	wishes to remain anonymous.  Since the communication channel
+	between the initiator and acceptor is a matter for individual
+	application protocols, it is inherently unspecified at the GSS-API
+	level, which can lead to examples that are less satisfying than
+	may be desired.  For example, the sample code in
+	<xref target="RFC2744" /> uses an unspecified send_token_to_peer()
+	routine.  For the interest of concreteness, this sample code
+	uses pipes for communication between initiator and acceptor, so that
+	explicit read() and write() may be used.
+      </t>
+      <section title="Generic GSS Application Sample Code">
+	<t>
+	  <figure>
+<artwork><![CDATA[
+SAMPLE CODE HERE
+]]></artwork>
+	  </figure>
+	</t>
+      </section>
+    </section>
   </middle>
   <back>
     <references title="Normative References">
