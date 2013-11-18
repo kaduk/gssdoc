@@ -69,6 +69,14 @@
 	in lieu of repeating the structure of the loop each time.
 	This document will perform that role.
       </t>
+      <t>The necessary requirements for correctly performing a GSS
+	negotiation loop are essentially all included in
+	<xref target="RFC2743" />, but they are scattered in many different
+	places.  This document brings all the requirements together into
+	one place for the convenience of implementors, even though the
+	normative requirements remain in <xref target="RFC2743" />.
+	In a few places, this document notes additional behavior which is
+	useful for applications but is not mandated by <xref target="RFC2743" />.
     </section>
     <section anchor="loop" title="Loop Structure">
       <t>The loop is begun by the appropriately named initiator,
