@@ -10,7 +10,7 @@
 <!ENTITY RFC4752 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4752.xml">
 <!ENTITY RFC4401 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml">
 ]>
-<rfc category="std" ipr="trust200902" docName="draft-kaduk-kitten-gss-loop-00" submissionType="IETF">
+<rfc category="info" ipr="trust200902" docName="draft-kaduk-kitten-gss-loop-00" submissionType="IETF">
   <front>
     <title>Structure of the GSS Negotiation Loop</title>
     <author initials="B." surname="Kaduk" fullname="Benjamin Kaduk">
@@ -69,25 +69,18 @@
 	in lieu of repeating the structure of the loop each time.
 	This document will perform that role.
       </t>
-      <section title="Requirements Language">
-	<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-	  "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-	  document are to be interpreted as described in
-	  <xref target="RFC2119" />.
-	</t>
-      </section>
     </section>
     <section anchor="loop" title="Loop Structure">
       <t>The loop is begun by the appropriately named initiator,
 	which calls GSS_Init_sec_context() with an empty (zero-length)
 	input_token and a fixed set of input flags containing the
 	desired attributes for the security context.
-	The initiator MUST NOT change any of the
+	The initiator should not change any of the
 	input parameters to GSS_Init_sec_context() between calls
 	to it during the loop, with the exception of the input_token
 	parameter, which will contain a message from the acceptor
 	after the initial call, and the input_context_handle, which
-	MUST be the result returned in the output_context_handle of
+	must be the result returned in the output_context_handle of
 	the previous call to GSS_Init_sec_context() (or GSS_C_NO_CONTEXT
 	for the first call).
       </t>
@@ -104,7 +97,7 @@
 	  anon_req_flag input to GSS_Init_sec_context(), then on
 	  non-error returns from GSS_Init_sec_context() (that is,
 	  the major status is GSS_S_COMPLETE or GSS_S_CONTINUE_NEEDED),
-	  the initiator MUST verify that the output value of anon_state
+	  the initiator must verify that the output value of anon_state
 	  from GSS_Init_sec_context() is true before sending the
 	  security context token to the acceptor.  Failing to perform
 	  this check could cause the initiator to lose anonymity.
@@ -126,25 +119,25 @@
 	    <t>If the major status code is GSS_S_COMPLETE and the
 	      output_token is nonempty, then the initiator's portion
 	      of the security context negotiation is complete but the
-	      acceptor's is not.  The initiator MUST send the output_token
+	      acceptor's is not.  The initiator must send the output_token
 	      to the acceptor so that the acceptor can establish its half
 	      of the security context.</t>
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is nonempty, the context negotiation is
-	      incomplete.  The initiator MUST send the output_token
+	      incomplete.  The initiator must send the output_token
 	      to the acceptor and await another input_token from the
 	      acceptor.</t>
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is empty, the mechanism has produced an
 	      inconsistent output and the security context negotiation
-	      has failed.  The initiator SHOULD indicate the failure to
+	      has failed.  The initiator should indicate the failure to
 	      the acceptor if an appropriate channel to do so is
 	      available.</t>
 	    <t>If the major status code is any other value, the context
 	      negotiation has failed.  If the output_token is nonempty,
-	      it is an error token, and the initiator SHOULD send it to
+	      it is an error token, and the initiator should send it to
 	      the acceptor.  If the output_token is empty, then the
-	      initiator SHOULD indicate the failure to the acceptor if an
+	      initiator should indicate the failure to the acceptor if an
 	      appropriate channel to do so is available.
 	    </t>
 	  </list>
@@ -172,10 +165,10 @@
 	  to the acceptor.  Conditions such as this can be treated in
 	  individual application protocol specifications.</t>
 	<t>If a regular security context output_token is produced by the
-	  call to GSS_Init_sec_context(), the initiator MUST transmit
+	  call to GSS_Init_sec_context(), the initiator must transmit
 	  this token to the acceptor over the application's communication
 	  channel.  If the call to GSS_Init_sec_context() returns an
-	  error token as output_token, it is RECOMMENDED that the intiator
+	  error token as output_token, it is recommended that the intiator
 	  transmit this token to the acceptor over the application's
 	  communication channel.
 	</t>
@@ -213,7 +206,7 @@
 	  from the previous call to GSS_Accept_sec_context() in a
 	  given negotiation loop (or GSS_C_NO_CONTEXT on the first
 	  call), but the acceptor_cred_handle and chan_bindings arguments
-	  MUST remain fixed over the course of a given GSS negotiation
+	  should remain fixed over the course of a given GSS negotiation
 	  loop.</t>
 	<t>The GSS acceptor calls GSS_Accept_sec_context(), using the
 	  input_context_handle for the current proto-security-context
@@ -228,25 +221,25 @@
 	    <t>If the major status code is GSS_S_COMPLETE and the
 	      output_token is nonempty, then the acceptor's portion
 	      of the security context negotiation is complete but the
-	      initiator's is not.  The acceptor MUST send the output_token
+	      initiator's is not.  The acceptor must send the output_token
 	      to the initiator so that the initiator can establish its half
 	      of the security context.</t>
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is nonempty, the context negotiation is
-	      incomplete.  The acceptor MUST send the output_token
+	      incomplete.  The acceptor must send the output_token
 	      to the initiator and await another input_token from the
 	      initiator.</t>
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is empty, the mechanism has produced an
 	      inconsistent output and the security context negotiation
-	      has failed.  The acceptor SHOULD indicate the failure to
+	      has failed.  The acceptor should indicate the failure to
 	      the initiator if an appropriate channel to do so is
 	      available.</t>
 	    <t>If the major status code is any other value, the context
 	      negotiation has failed.  If the output_token is nonempty,
-	      it is an error token, and the acceptor SHOULD send it to
+	      it is an error token, and the acceptor should send it to
 	      the initiator.  If the output_token is empty, then the
-	      acceptor SHOULD indicate the failure to the initiator if an
+	      acceptor should indicate the failure to the initiator if an
 	      appropriate channel to do so is available.
 	    </t>
 	  </list>
@@ -267,10 +260,10 @@
 	  in some of the above cases conditional on "an appropriate channel
 	  to do so".</t>
 	<t>If a regular security context output_token is produced by the
-	  call to GSS_Accept_sec_context(), the acceptor MUST transmit
+	  call to GSS_Accept_sec_context(), the acceptor must transmit
 	  this token to the initiator over the application's communication
 	  channel.  If the call to GSS_Accept_sec_context() returns an
-	  error token as output_token, it is RECOMMENDED that the acceptor
+	  error token as output_token, it is recommended that the acceptor
 	  transmit this token to the initiator over the application's
 	  communication channel.
 	</t>
@@ -319,23 +312,23 @@
 	to GSS_Init_sec_context() values for the following booleans:
 	deleg_req_flag, mutual_req_flag, replay_det_req_flag,
 	sequence_req_flag, conf_req_flag, and integ_req_flag.  Upon
-	completion of security context negotiation, the initiator MUST
+	completion of security context negotiation, the initiator must
 	verify the values of the deleg_state, mutual_state, replay_det_state,
 	sequence_state, conf_avail, and integ_avail flags
 	from the last call to GSS_Init_sec_context()
 	corresponding to the requested flags.  If a flag was requested
 	but is not available, and that feature is necessary for the
-	appplication protocol, the initiator MUST destroy the security
+	appplication protocol, the initiator must destroy the security
 	context and not use the security context for application traffic.</t>
       <t>Application protocol specifications citing this document
-	MUST indicate which context flags are required for the application
+	should indicate which context flags are required for the application
 	protocol.</t>
       <t>The acceptor receives as output the following booleans:
 	deleg_state, mutual_state, replay_det_state, sequence_state,
 	anon_state, trans_state, conf_avail, and integ_avail.
-	The acceptor MUST verify that any flags necessary for the application
+	The acceptor must verify that any flags necessary for the application
 	protocol are set.  If a necessary flag is not set, the acceptor
-	MUST destroy the security context and not use the security context
+	must destroy the security context and not use the security context
 	for application traffic.
       </t>
       <section anchor="partial"
@@ -349,7 +342,7 @@
 	  GSS_Accept_sec_context() indicates when per-message operations
 	  are avaialble.</t>
 	<t>Applications requiring confidentiality and/or integrity
-	  protection from such messages MUST check the value of the
+	  protection from such messages must check the value of the
 	  conf_avail and/or integ_avail output flags from
 	  GSS_Init_sec_context()/GSS_Accept_sec_context() as well as the
 	  conf_state output of GSS_Wrap() (if GSS_Wrap() is used).
