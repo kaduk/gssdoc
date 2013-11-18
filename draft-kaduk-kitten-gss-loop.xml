@@ -90,7 +90,11 @@
 	after the initial call, and the input_context_handle, which
 	must be the result returned in the output_context_handle of
 	the previous call to GSS_Init_sec_context() (or GSS_C_NO_CONTEXT
-	for the first call).
+	for the first call).  (In the C bindings, there is only a single
+	read/modify context_handle argument.)  RFC 2743 only requires that
+	the claimant_cred_handle argument remain constant over all calls in
+	the loop, but the other non-excepted arguments should also remain
+	fixed for reliable operation.
       </t>
       <t>The following subsections will describe the various steps of
 	the loop, without special consideration to whether a call
@@ -215,7 +219,10 @@
 	  given negotiation loop (or GSS_C_NO_CONTEXT on the first
 	  call), but the acceptor_cred_handle and chan_bindings arguments
 	  should remain fixed over the course of a given GSS negotiation
-	  loop.</t>
+	  loop.  <xref target="RFC2743" /> only requires that the
+	  acceptor_cred_handle remain fixed throughout the loop, but
+	  the chan_bindings argument should also remain fixed for
+	  reliable operation.</t>
 	<t>The GSS acceptor calls GSS_Accept_sec_context(), using the
 	  input_context_handle for the current proto-security-context
 	  and the input_token received from the initiator.
