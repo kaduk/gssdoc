@@ -141,10 +141,12 @@
 	      acceptor.</t>
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is empty, the mechanism has produced an
-	      inconsistent output and the security context negotiation
-	      has failed.  The initiator should indicate the failure to
-	      the acceptor if an appropriate channel to do so is
-	      available.</t>
+	      output which is not compliant with <xref target="RFC2743" />.
+	      However, there are some known implementations of certain
+	      mechanisms which do produce empty context negotiation
+	      tokens.  For maximum interoperability, applications should
+	      be prepared to accept such tokens, and should transmit them
+	      to the acceptor if they are generated.</t>
 	    <t>If the major status code is any other value, the context
 	      negotiation has failed.  If the output_token is nonempty,
 	      it is an error token, and the initiator should send it to
@@ -246,10 +248,13 @@
 	      initiator.</t>
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is empty, the mechanism has produced an
-	      inconsistent output and the security context negotiation
-	      has failed.  The acceptor should indicate the failure to
-	      the initiator if an appropriate channel to do so is
-	      available.</t>
+	      output which is not compliant with <xref target="RFC2743" />.
+	      output which is not compliant with <xref target="RFC2743" />.
+	      However, there are some known implementations of certain
+	      mechanisms which do produce empty context negotiation
+	      tokens.  For maximum interoperability, applications should
+	      be prepared to accept such tokens, and should transmit them
+	      to the initiator if they are generated.</t>
 	    <t>If the major status code is any other value, the context
 	      negotiation has failed.  If the output_token is nonempty,
 	      it is an error token, and the acceptor should send it to
