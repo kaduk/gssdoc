@@ -77,6 +77,7 @@
 	normative requirements remain in <xref target="RFC2743" />.
 	In a few places, this document notes additional behavior which is
 	useful for applications but is not mandated by <xref target="RFC2743" />.
+      </t>
     </section>
     <section anchor="loop" title="Loop Structure">
       <t>The loop is begun by the appropriately named initiator,
