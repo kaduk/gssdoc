@@ -95,7 +95,6 @@ do_initiator(void)
 #endif
 
     req_flags = GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG;
-    req_flags = GSS_C_INTEG_FLAG;
 
     while (!context_established) {
 	/* The initiator_cred_handle, mech_type, time_req, input_chan_bindings,
