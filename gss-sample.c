@@ -110,6 +110,7 @@ printf("g_i_s_c major %x\n", major);
 	/* This memory is no longer needed. */
 	free(input_token.value);
 	input_token.value = NULL;
+	input_token.length = 0;
 	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
 	 * require a(nother) token from the acceptor.  We should send
 	 * what we have in that case, regardless of its length.  If the
@@ -184,6 +185,7 @@ printf("g_a_s_c major %x\n", major);
 	/* Release memory no longer needed. */
 	free(input_token.value);
 	input_token.value = NULL;
+	input_token.length = 0;
 	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
 	 * require a(nother) token from the initiator.  We should send
 	 * what we have in that case, regardless of its length.  If the
