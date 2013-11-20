@@ -34,7 +34,6 @@ send_token(int fd, gss_buffer_t token)
 	warnx("send_token could not write token\n");
 	return 1;
     }
-printf("sent token length %u\n", length);
     return 0;
 }
 
@@ -65,7 +64,6 @@ receive_token(int fd, gss_buffer_t token)
 	warnx("Could not receive token\n");
 	return 1;
     }
-printf("got token length %u\n", length);
     token->length = length;
     return 0;
 }
@@ -105,7 +103,6 @@ do_initiator(void)
 				     target_name, GSS_C_NO_OID, req_flags, 0,
 				     NULL, &input_token, NULL, &output_token,
 				     &ret_flags, NULL);
-printf("g_i_s_c major %x\n", major);
 	/* This memory is no longer needed. */
 	free(input_token.value);
 	input_token.value = NULL;
@@ -180,7 +177,6 @@ do_acceptor(void)
 	major = gss_accept_sec_context(&minor, &ctx, GSS_C_NO_CREDENTIAL,
 				       &input_token, NULL, &client_name, NULL,
 				       &output_token, &ret_flags, NULL, NULL);
-printf("g_a_s_c major %x\n", major);
 	/* Release memory no longer needed. */
 	free(input_token.value);
 	input_token.value = NULL;
