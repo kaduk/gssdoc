@@ -154,7 +154,7 @@ do_initiator(int readfd, int writefd)
 	 * require a(nother) token from the acceptor.  We should send
 	 * what we have in that case, regardless of its length.  If the
 	 * token's length is positive, we must send it always, too. */
-	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0 ||
+	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
 	    output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
@@ -169,7 +169,7 @@ do_initiator(int readfd, int writefd)
 	/* Having sent any output_token, release the storage for it. */
 	(void)gss_release_buffer(&minor, &output_token);
 
-	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0) {
+	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
 	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
@@ -210,7 +210,7 @@ do_acceptor(int readfd, int writefd)
 
     while(!context_established) {
 	/* We always need at least one token from the peer.  Get it first. */
-	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0) {
+	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
 	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
@@ -238,7 +238,7 @@ do_acceptor(int readfd, int writefd)
 	 * require a(nother) token from the initiator.  We should send
 	 * what we have in that case, regardless of its length.  If the
 	 * token's length is positive, we must send it always, too. */
-	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0 ||
+	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
 	    output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
