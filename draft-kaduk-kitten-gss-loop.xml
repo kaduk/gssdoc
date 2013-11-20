@@ -486,13 +486,13 @@ send_token(int fd, gss_buffer_t token)
     length = token->length;
     ret = write(fd, &length, 4);
     if (ret != 4) {
-	warnx("send_token could not write length\n");
-	return 1;
+        warnx("send_token could not write length\n");
+        return 1;
     }
     ret = write(fd, token->value, length);
     if (ret != length) {
-	warnx("send_token could not write token\n");
-	return 1;
+        warnx("send_token could not write token\n");
+        return 1;
     }
     return 0;
 }
@@ -512,23 +512,23 @@ receive_token(int fd, gss_buffer_t token)
     assert(sizeof(length) == 4);
     ret = read(fd, &length, 4);
     if (ret != 4) {
-	warnx("receive_token could not read length, ret %u\n", length);
-	return 1;
+        warnx("receive_token could not read length, ret %u\n", length);
+        return 1;
     }
     /* Do a little sanity checking. */
     if (length > 64 * 1024*1024) {
-	warnx("Attempting to receive token larger than 64M\n");
-	return 1;
+        warnx("Attempting to receive token larger than 64M\n");
+        return 1;
     }
     token->value = malloc(length);
     if (token->value == NULL) {
-	warnx("Could not allocate memory to receive token\n");
-	return 1;
+        warnx("Could not allocate memory to receive token\n");
+        return 1;
     }
     ret = read(fd, token->value, length);
     if (ret != length) {
-	warnx("Could not receive token\n");
-	return 1;
+        warnx("Could not receive token\n");
+        return 1;
     }
     token->length = length;
     return 0;
@@ -553,7 +553,7 @@ do_initiator(int readfd, int writefd)
     name_buf.value = "<service>@<hostname.domain>";
     name_buf.length = strlen(name_buf.value);
     major = gss_import_name(&minor, &name_buf, GSS_C_NT_HOSTBASED_SERVICE,
-			    &target_name);
+                            &target_name);
     /* target_name must be released with gss_release_name() at cleanup. */
 #endif
 
@@ -565,56 +565,56 @@ do_initiator(int readfd, int writefd)
 #endif
 
     while (!context_established) {
-	/* The initiator_cred_handle, mech_type, time_req, input_chan_bindings,
-	 * actual_mech_type, and time_rec parameters are not needed in many
-	 * cases.  We pass GSS_C_NO_CREDENTIAL, GSS_C_NO_OID, 0, NULL, NULL,
-	 * and NULL for them, respectively. */
-	major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL, &ctx,
-				     target_name, GSS_C_NO_OID, req_flags, 0,
-				     NULL, &input_token, NULL, &output_token,
-				     &ret_flags, NULL);
-	/* This memory is no longer needed. */
-	release_buffer(&input_token);
+        /* The initiator_cred_handle, mech_type, time_req, input_chan_bindings,
+         * actual_mech_type, and time_rec parameters are not needed in many
+         * cases.  We pass GSS_C_NO_CREDENTIAL, GSS_C_NO_OID, 0, NULL, NULL,
+         * and NULL for them, respectively. */
+        major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL, &ctx,
+                                     target_name, GSS_C_NO_OID, req_flags, 0,
+                                     NULL, &input_token, NULL, &output_token,
+                                     &ret_flags, NULL);
+        /* This memory is no longer needed. */
+        release_buffer(&input_token);
 #ifdef ANONYMOUS
-	/* Initiators which wish to remain anonymous must check whether
-	 * their request has been honored before sending each context token. */
-	if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
-	    warnx("Anonymous processing not available\n");
-	    goto cleanup;
-	}
+        /* Initiators which wish to remain anonymous must check whether
+         * their request has been honored before sending each context token. */
+        if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
+            warnx("Anonymous processing not available\n");
+            goto cleanup;
+        }
 #endif
-	/* Always send a token if we are expecting another input token
-	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
-	    output_token.length > 0) {
-	    ret = send_token(writefd, &output_token);
-	    if (ret != 0)
-		goto cleanup;
-	}
-	/* Check for errors after sending the token so that we will send
-	 * error tokens. */
-	if (GSS_ERROR(major)) {
-	    warnx("gss_init_sec_context() error major 0x%x\n", major);
-	    goto cleanup;
-	}
-	/* Having sent any output_token, release the storage for it. */
-	(void)gss_release_buffer(&minor, &output_token);
+        /* Always send a token if we are expecting another input token
+         * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
+        if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
+            output_token.length > 0) {
+            ret = send_token(writefd, &output_token);
+            if (ret != 0)
+                goto cleanup;
+        }
+        /* Check for errors after sending the token so that we will send
+         * error tokens. */
+        if (GSS_ERROR(major)) {
+            warnx("gss_init_sec_context() error major 0x%x\n", major);
+            goto cleanup;
+        }
+        /* Having sent any output_token, release the storage for it. */
+        (void)gss_release_buffer(&minor, &output_token);
 
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
-	    ret = receive_token(readfd, &input_token);
-	    if (ret != 0)
-		goto cleanup;
-	} else if (major == GSS_S_COMPLETE) {
-	    context_established = 1;
-	} else {
-	    /* This situation is forbidden by RFC 2743.  Bail out. */
-	    warnx("major not complete or continue-needed but not error\n");
-	    goto cleanup;
-	}
+        if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
+            ret = receive_token(readfd, &input_token);
+            if (ret != 0)
+                goto cleanup;
+        } else if (major == GSS_S_COMPLETE) {
+            context_established = 1;
+        } else {
+            /* This situation is forbidden by RFC 2743.  Bail out. */
+            warnx("major not complete or continue-needed but not error\n");
+            goto cleanup;
+        }
     }	/* while(!context_established) */
     if ((ret_flags & req_flags) != req_flags) {
-	warnx("Negotiated context does not support requested flags\n");
-	goto cleanup;
+        warnx("Negotiated context does not support requested flags\n");
+        goto cleanup;
     }
     printf("Initiator's context negotiation successful\n");
 cleanup:
@@ -640,50 +640,50 @@ do_acceptor(int readfd, int writefd)
     major = GSS_S_CONTINUE_NEEDED;
 
     while(!context_established) {
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
-	    ret = receive_token(readfd, &input_token);
-	    if (ret != 0)
-		goto cleanup;
-	} else if (major == GSS_S_COMPLETE) {
-	    context_established = 1;
-	    break;
-	} else {
-	    /* This situation is forbidden by RFC 2743.  Bail out. */
-	    warnx("major not complete or continue-needed but not error\n");
-	    goto cleanup;
-	}
-	/* We can use the default behavior or do not need the returned
-	 * information for the parameters acceptor_cred_handle,
-	 * input_chan_bindings, mech_type, time_rec, and delegated_cred_handle
-	 * and pass the values GSS_C_NO_CREDENTIAL, NULL, NULL, NULL, and NULL,
-	 * respectively.  In some cases the src_name will not be needed, but
-	 * most likely it will be needed for some authorization or logging
-	 * functionality. */
-	major = gss_accept_sec_context(&minor, &ctx, GSS_C_NO_CREDENTIAL,
-				       &input_token, NULL, &client_name, NULL,
-				       &output_token, &ret_flags, NULL, NULL);
-	/* Release memory no longer needed. */
-	release_buffer(&input_token);
-	/* Always send a token if we are expecting another input token
-	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
-	    output_token.length > 0) {
-	    ret = send_token(writefd, &output_token);
-	    if (ret != 0)
-		goto cleanup;
-	}
-	/* Check for errors after sending the token so that we will send
-	 * error tokens. */
-	if (GSS_ERROR(major)) {
-	    warnx("gss_accept_sec_context() error major 0x%x\n", major);
-	    goto cleanup;
-	}
-	/* Release the output token's storage; we don't need it anymore. */
-	(void)gss_release_buffer(&minor, &output_token);
+        if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
+            ret = receive_token(readfd, &input_token);
+            if (ret != 0)
+                goto cleanup;
+        } else if (major == GSS_S_COMPLETE) {
+            context_established = 1;
+            break;
+        } else {
+            /* This situation is forbidden by RFC 2743.  Bail out. */
+            warnx("major not complete or continue-needed but not error\n");
+            goto cleanup;
+        }
+        /* We can use the default behavior or do not need the returned
+         * information for the parameters acceptor_cred_handle,
+         * input_chan_bindings, mech_type, time_rec, and delegated_cred_handle
+         * and pass the values GSS_C_NO_CREDENTIAL, NULL, NULL, NULL, and NULL,
+         * respectively.  In some cases the src_name will not be needed, but
+         * most likely it will be needed for some authorization or logging
+         * functionality. */
+        major = gss_accept_sec_context(&minor, &ctx, GSS_C_NO_CREDENTIAL,
+                                       &input_token, NULL, &client_name, NULL,
+                                       &output_token, &ret_flags, NULL, NULL);
+        /* Release memory no longer needed. */
+        release_buffer(&input_token);
+        /* Always send a token if we are expecting another input token
+         * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
+        if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
+            output_token.length > 0) {
+            ret = send_token(writefd, &output_token);
+            if (ret != 0)
+                goto cleanup;
+        }
+        /* Check for errors after sending the token so that we will send
+         * error tokens. */
+        if (GSS_ERROR(major)) {
+            warnx("gss_accept_sec_context() error major 0x%x\n", major);
+            goto cleanup;
+        }
+        /* Release the output token's storage; we don't need it anymore. */
+        (void)gss_release_buffer(&minor, &output_token);
     }	/* while(!context_established) */
     if ((ret_flags & GSS_C_INTEG_FLAG) != GSS_C_INTEG_FLAG) {
-	warnx("Negotiated context does not support integrity\n");
-	goto cleanup;
+        warnx("Negotiated context does not support integrity\n");
+        goto cleanup;
     }
     printf("Acceptor's context negotiation successful\n");
 cleanup:
@@ -699,16 +699,16 @@ int main(int argc, char **argv)
     pid_t pid;
 
     if (pipe(pipefds_itoa) != 0)
-	err(1, "pipe failed for itoa\n");
+        err(1, "pipe failed for itoa\n");
     if (pipe(pipefds_atoi) != 0)
-	err(1, "pipe failed for atoi\n");
+        err(1, "pipe failed for atoi\n");
     pid = fork();
     if (pid == 0)
-	do_initiator(pipefds_atoi[0], pipefds_itoa[1]);
+        do_initiator(pipefds_atoi[0], pipefds_itoa[1]);
     else if (pid > 0)
-	do_acceptor(pipefds_itoa[0], pipefds_atoi[1]);
+        do_acceptor(pipefds_itoa[0], pipefds_atoi[1]);
     else
-	err(1, "fork() failed\n");
+        err(1, "fork() failed\n");
     exit(0);
 }
 ]]></artwork>
