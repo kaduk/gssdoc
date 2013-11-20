@@ -433,7 +433,7 @@
 	the credentials available to the acceptor).  A skeleton for how
 	this may be done is provided, in a disabled block of code.
       </t>
-      <section title="Generic GSS Application Sample Code">
+      <section title="GSS Application Sample Code">
 	<t>
 	  <figure>
 <artwork><![CDATA[
