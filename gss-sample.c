@@ -150,18 +150,16 @@ do_initiator(int readfd, int writefd)
 	    goto cleanup;
 	}
 #endif
-	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
-	 * require a(nother) token from the acceptor.  We should send
-	 * what we have in that case, regardless of its length.  If the
-	 * token's length is positive, we must send it always, too. */
+	/* Always send a token if we are expecting another input token
+	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
 	    output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
 		goto cleanup;
 	}
-	/* This error check occurs after we send the token so that we will
-	 * send an error token if one is generated. */
+	/* Check for errors after sending the token so that we will send
+	 * error tokens. */
 	if (GSS_ERROR(major)) {
 	    warnx("gss_init_sec_context() error major 0x%x\n", major);
 	    goto cleanup;
@@ -209,7 +207,6 @@ do_acceptor(int readfd, int writefd)
     major = GSS_S_CONTINUE_NEEDED;
 
     while(!context_established) {
-	/* We always need at least one token from the peer.  Get it first. */
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
 	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
@@ -234,18 +231,16 @@ do_acceptor(int readfd, int writefd)
 				       &output_token, &ret_flags, NULL, NULL);
 	/* Release memory no longer needed. */
 	release_buffer(&input_token);
-	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
-	 * require a(nother) token from the initiator.  We should send
-	 * what we have in that case, regardless of its length.  If the
-	 * token's length is positive, we must send it always, too. */
+	/* Always send a token if we are expecting another input token
+	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
 	    output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
 		goto cleanup;
 	}
-	/* This error check occurs after we send the token so that we will
-	 * send an error token if one is generated. */
+	/* Check for errors after sending the token so that we will send
+	 * error tokens. */
 	if (GSS_ERROR(major)) {
 	    warnx("gss_accept_sec_context() error major 0x%x\n", major);
 	    goto cleanup;
