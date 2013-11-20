@@ -16,6 +16,14 @@
 int pipefds_itoa[2];
 int pipefds_atoi[2];
 
+static void
+release_buffer(gss_buffer_t buf)
+{
+    free(buf->value);
+    buf->value = NULL;
+    buf->length = 0;
+}
+
 static int
 send_token(int fd, gss_buffer_t token)
 {
@@ -104,9 +112,7 @@ do_initiator(void)
 				     NULL, &input_token, NULL, &output_token,
 				     &ret_flags, NULL);
 	/* This memory is no longer needed. */
-	free(input_token.value);
-	input_token.value = NULL;
-	input_token.length = 0;
+	release_buffer(&input_token);
 	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
 	 * require a(nother) token from the acceptor.  We should send
 	 * what we have in that case, regardless of its length.  If the
@@ -178,9 +184,7 @@ do_acceptor(void)
 				       &input_token, NULL, &client_name, NULL,
 				       &output_token, &ret_flags, NULL, NULL);
 	/* Release memory no longer needed. */
-	free(input_token.value);
-	input_token.value = NULL;
-	input_token.length = 0;
+	release_buffer(&input_token);
 	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
 	 * require a(nother) token from the initiator.  We should send
 	 * what we have in that case, regardless of its length.  If the
