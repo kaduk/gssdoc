@@ -712,6 +712,24 @@ int main(int argc, char **argv)
 	</t>
       </section>
     </section>
+    <section title="Security Considerations">
+      <t>This document provides a (reasonably) concise description and
+	example for correct construction of the GSS-API security context
+	negotiation loop.  Since everything relating to the construction
+	and use of a GSS security context is security-related, there
+	are security-relevant considerations throughout the document.
+	It is useul to call out a few things in this section, though.</t>
+      <t>The GSS-API uses a request-and-check model for features.  An
+	application using the GSS-API requests that certain features
+	(confidentiality protection for messages, or anonynimity), but
+	such a request does not require the GSS implementation to provide
+	the feature.  The application must check the returned flags to
+	verify whether a requested feature is present; if the feature
+	was non-optional for the application, the application must generate
+	an error.  Phrased differently, the GSS-API will not generate an
+	error if it is unable to satisfy the features requested by the
+	application.</t>
+    </section>
   </middle>
   <back>
     <references title="Normative References">
