@@ -89,7 +89,7 @@ receive_token(int fd, gss_buffer_t token)
 }
 
 static void
-do_initiator(void)
+do_initiator(int readfd, int writefd)
 {
     int context_established = 0;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
@@ -133,7 +133,7 @@ do_initiator(void)
 	 * token's length is positive, we must send it always, too. */
 	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0 ||
 	    output_token.length > 0) {
-	    ret = send_token(pipefds_itoa[1], &output_token);
+	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
 		goto cleanup;
 	}
@@ -147,7 +147,7 @@ do_initiator(void)
 	(void)gss_release_buffer(&minor, &output_token);
 
 	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0) {
-	    ret = receive_token(pipefds_atoi[0], &input_token);
+	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
 	} else if (major == GSS_S_COMPLETE) {
@@ -171,7 +171,7 @@ cleanup:
 }
 
 static void
-do_acceptor(void)
+do_acceptor(int readfd, int writefd)
 {
     int context_established = 0, ret;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
@@ -188,7 +188,7 @@ do_acceptor(void)
     while(!context_established) {
 	/* We always need at least one token from the peer.  Get it first. */
 	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0) {
-	    ret = receive_token(pipefds_itoa[0], &input_token);
+	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
 	} else if (major == GSS_S_COMPLETE) {
@@ -217,7 +217,7 @@ do_acceptor(void)
 	 * token's length is positive, we must send it always, too. */
 	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0 ||
 	    output_token.length > 0) {
-	    ret = send_token(pipefds_atoi[1], &output_token);
+	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
 		goto cleanup;
 	}
@@ -252,9 +252,9 @@ int main(int argc, char **argv)
 	err(1, "pipe failed for atoi\n");
     pid = fork();
     if (pid == 0)
-	do_initiator();
+	do_initiator(pipefds_atoi[0], pipefds_itoa[1]);
     else if (pid > 0)
-	do_acceptor();
+	do_acceptor(pipefds_itoa[0], pipefds_atoi[1]);
     else
 	err(1, "fork() failed\n");
     exit(0);
