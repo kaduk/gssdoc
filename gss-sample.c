@@ -188,7 +188,7 @@ cleanup:
     /* It is safe to call gss_release_buffer twice on the same buffer. */
     (void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token; pass NULL. */
-    major = gss_delete_sec_context(&minor, &ctx, NULL);
+    (void)gss_delete_sec_context(&minor, &ctx, NULL);
 }
 
 static void
@@ -257,7 +257,7 @@ cleanup:
     /* It is safe to call gss_release_buffer twice on the same buffer. */
     release_buffer(&input_token);
     /* Do not request a context deletion token, pass NULL. */
-    major = gss_delete_sec_context(&minor, &ctx, NULL);
+    (void)gss_delete_sec_context(&minor, &ctx, NULL);
     (void)gss_release_name(&minor, &client_name);
 }
 
