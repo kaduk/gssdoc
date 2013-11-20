@@ -258,6 +258,7 @@ cleanup:
     release_buffer(&input_token);
     /* Do not request a context deletion token, pass NULL. */
     major = gss_delete_sec_context(&minor, &ctx, NULL);
+    (void)gss_release_name(&minor, &client_name);
 }
 
 int main(int argc, char **argv)
