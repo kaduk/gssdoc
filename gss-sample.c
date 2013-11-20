@@ -122,6 +122,9 @@ do_initiator(int readfd, int writefd)
     /* Mutual authentication will require a token from acceptor to initiator,
      * and thus a second call to gss_init_sec_context(). */
     req_flags = GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG;
+#ifdef ANONYMOUS
+    req_flags |= GSS_C_ANON_FLAG;
+#endif
 
     while (!context_established) {
 	/* The initiator_cred_handle, mech_type, time_req, input_chan_bindings,
@@ -134,6 +137,14 @@ do_initiator(int readfd, int writefd)
 				     &ret_flags, NULL);
 	/* This memory is no longer needed. */
 	release_buffer(&input_token);
+#ifdef ANONYMOUS
+	/* Initiators which wish to remain anonymous must check whether
+	 * their request has been honored before sending each context token. */
+	if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
+	    warnx("Anonymous processing not available\n");
+	    goto cleanup;
+	}
+#endif
 	/* The test against GSS_S_CONTINUE_NEEDED is checking whether we
 	 * require a(nother) token from the acceptor.  We should send
 	 * what we have in that case, regardless of its length.  If the
