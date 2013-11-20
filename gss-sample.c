@@ -16,6 +16,11 @@
 int pipefds_itoa[2];
 int pipefds_atoi[2];
 
+/*
+ * This helper is used only on buffers that we allocate ourselves (e.g.,
+ * from receive_buffer()).  Buffers allocated by GSS routines must use
+ * gss_release_buffer().
+ */
 static void
 release_buffer(gss_buffer_t buf)
 {
