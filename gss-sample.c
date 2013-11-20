@@ -24,6 +24,12 @@ release_buffer(gss_buffer_t buf)
     buf->length = 0;
 }
 
+/*
+ * Helper to send a token on the specified fd, using our simple protocol.
+ * We must warnx() instead of errx() because compliant GSS applications must
+ * release resources allocated by the GSS library before exiting.  (These
+ * resources may be non-local to the current process.)
+ */
 static int
 send_token(int fd, gss_buffer_t token)
 {
@@ -45,6 +51,12 @@ send_token(int fd, gss_buffer_t token)
     return 0;
 }
 
+/*
+ * Helper to receive a token on the specified fd, using our simple protocol.
+ * We must warnx() instead of errx() because compliant GSS applications must
+ * release resources allocated by the GSS library before exiting.  (These
+ * resources may be non-local to the current process.)
+ */
 static int
 receive_token(int fd, gss_buffer_t token)
 {
@@ -100,6 +112,8 @@ do_initiator(void)
 	errx(1, "Could not import name\n");
 #endif
 
+    /* Mutual authentication will require a token from acceptor to initiator,
+     * and thus a second call to gss_init_sec_context(). */
     req_flags = GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG;
 
     while (!context_established) {
@@ -125,24 +139,34 @@ do_initiator(void)
 	}
 	/* This error check occurs after we send the token so that we will
 	 * send an error token if one is generated. */
-	if (GSS_ERROR(major))
-	    errx(1, "gss_init_sec_context() error major %u\n", major);
+	if (GSS_ERROR(major)) {
+	    warnx("gss_init_sec_context() error major 0x%x\n", major);
+	    goto cleanup;
+	}
 	/* Having sent any output_token, release the storage for it. */
 	(void)gss_release_buffer(&minor, &output_token);
 
 	if ((GSS_SUPPLEMENTARY_INFO(major) & GSS_S_CONTINUE_NEEDED) != 0) {
 	    ret = receive_token(pipefds_atoi[0], &input_token);
+	    if (ret != 0)
+		goto cleanup;
 	} else if (major == GSS_S_COMPLETE) {
 	    context_established = 1;
 	} else {
-	    errx(1, "major not complete or continue-needed but not error\n");
+	    /* This situation is forbidden by RFC 2743.  Bail out. */
+	    warnx("major not complete or continue-needed but not error\n");
+	    goto cleanup;
 	}
     }	/* while(!context_established) */
-    if ((ret_flags & req_flags) != req_flags)
-	errx(1, "Negotiated context does not support requested flags\n");
+    if ((ret_flags & req_flags) != req_flags) {
+	warnx("Negotiated context does not support requested flags\n");
+	goto cleanup;
+    }
     printf("Initiator's context negotiation successful\n");
-    /* Do not request a context deletion token, pass NULL. */
 cleanup:
+    /* It is safe to call gss_release_buffer twice on the same buffer. */
+    (void)gss_release_buffer(&minor, &output_token);
+    /* Do not request a context deletion token; pass NULL. */
     major = gss_delete_sec_context(&minor, &ctx, NULL);
 }
 
@@ -171,7 +195,9 @@ do_acceptor(void)
 	    context_established = 1;
 	    break;
 	} else {
-	    errx(1, "major not complete or continue-needed but not error\n");
+	    /* This situation is forbidden by RFC 2743.  Bail out. */
+	    warnx("major not complete or continue-needed but not error\n");
+	    goto cleanup;
 	}
 	/* We can use the default behavior or do not need the returned
 	 * information for the parameters acceptor_cred_handle,
@@ -197,16 +223,22 @@ do_acceptor(void)
 	}
 	/* This error check occurs after we send the token so that we will
 	 * send an error token if one is generated. */
-	if (GSS_ERROR(major))
-	    errx(1, "gss_accept_sec_context() error major %u\n", major);
+	if (GSS_ERROR(major)) {
+	    warnx("gss_accept_sec_context() error major 0x%x\n", major);
+	    goto cleanup;
+	}
 	/* Release the output token's storage; we don't need it anymore. */
 	(void)gss_release_buffer(&minor, &output_token);
     }	/* while(!context_established) */
-    if ((ret_flags & GSS_C_INTEG_FLAG) != GSS_C_INTEG_FLAG)
-	errx(1, "Negotiated context does not support integrity\n");
+    if ((ret_flags & GSS_C_INTEG_FLAG) != GSS_C_INTEG_FLAG) {
+	warnx("Negotiated context does not support integrity\n");
+	goto cleanup;
+    }
     printf("Acceptor's context negotiation successful\n");
-    /* Do not request a context deletion token, pass NULL. */
 cleanup:
+    /* It is safe to call gss_release_buffer twice on the same buffer. */
+    release_buffer(&input_token);
+    /* Do not request a context deletion token, pass NULL. */
     major = gss_delete_sec_context(&minor, &ctx, NULL);
 }
 
