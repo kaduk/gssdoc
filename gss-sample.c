@@ -110,6 +110,13 @@ do_initiator(int readfd, int writefd)
 			    &target_name);
     if (GSS_ERROR(major))
 	errx(1, "Could not import name\n");
+#else
+    gss_buffer_desc name_buf;
+    name_buf.value = "<service>@<hostname.domain>";
+    name_buf.length = strlen(name_buf.value);
+    major = gss_import_name(&minor, &name_buf, GSS_C_NT_HOSTBASED_SERVICE,
+			    &target_name);
+    /* target_name must be released with gss_release_name() at cleanup. */
 #endif
 
     /* Mutual authentication will require a token from acceptor to initiator,
