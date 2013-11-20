@@ -404,17 +404,34 @@
       </section>
     </section>
     <section anchor="samples" title="Sample Code">
-      <t>This section gives sample code for the GSS negotiation loop of
-	a regular application and an application where the initiator
-	wishes to remain anonymous.  Since the communication channel
+      <t>This section gives sample code for the GSS negotiation loop, both for
+	a regular application and for an application where the initiator
+	wishes to remain anonymous.  Since the code for the two cases is
+	very similar, the anonymous-specific additions are wrapped in
+	preprocessor conditionals which may be ignored if anonymous processing
+	is not needed.</t>
+      <t> Since the communication channel
 	between the initiator and acceptor is a matter for individual
 	application protocols, it is inherently unspecified at the GSS-API
 	level, which can lead to examples that are less satisfying than
 	may be desired.  For example, the sample code in
 	<xref target="RFC2744" /> uses an unspecified send_token_to_peer()
-	routine.  For the interest of concreteness, this sample code
+	routine.  In the interest of concreteness, this sample code
 	uses pipes for communication between initiator and acceptor, so that
-	explicit read() and write() may be used.
+	explicit read() and write() may be used.</t>
+      <t>This sample code is written in C, using the GSS-API C bindings
+	<xref target="RFC2744" />.  The macros GSS_ERROR() and
+	GSS_SUPPLEMENTARY_INFO() are of particular use to help unpack
+	the various sorts of information which can be stored in the
+	major status field.  Applications written in other languages will
+	need to exercise care that checks against the major status value
+	are written correctly.</t>
+      <t>This sample code should be compilable as a standalone program,
+	linked against a GSS-API library.  With most implementations, in
+	order for it to successfully run, the initiator will need to
+	specify an explicit target name for the acceptor (which must match
+	the credentials available to the acceptor).  A skeleton for how
+	this may be done is provided, in a disabled block of code.
       </t>
       <section title="Generic GSS Application Sample Code">
 	<t>
