@@ -727,7 +727,8 @@ int main(int argc, char **argv)
       &RFC2203;
     </references>
     <section title="Acknowledgements">
-      <t>Acknowledgements.</t>
+      <t>Thanks to Nico Williams and Jeff Hutzleman for prompting me to
+	write this document.</t>
     </section>
   </back>
 </rfc>
