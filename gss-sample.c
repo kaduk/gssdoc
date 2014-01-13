@@ -18,7 +18,7 @@ int pipefds_atoi[2];
 
 /*
  * This helper is used only on buffers that we allocate ourselves (e.g.,
- * from receive_buffer()).  Buffers allocated by GSS routines must use
+ * from receive_token()).  Buffers allocated by GSS routines must use
  * gss_release_buffer().
  */
 static void
@@ -30,7 +30,8 @@ release_buffer(gss_buffer_t buf)
 }
 
 /*
- * Helper to send a token on the specified fd, using our simple protocol.
+ * Helper to send a token on the specified fd.
+ *
  * We must warnx() instead of errx() because compliant GSS applications must
  * release resources allocated by the GSS library before exiting.  (These
  * resources may be non-local to the current process.)
@@ -38,6 +39,18 @@ release_buffer(gss_buffer_t buf)
 static int
 send_token(int fd, gss_buffer_t token)
 {
+    /*
+     * Supply token framing and transmission code here.
+     *
+     * It is advisable for the application protocol to specify the length
+     * of the token being transmitted, unless the underlying transit
+     * does so implicitly.
+     *
+     * In addition to checking for error returns from whichever syscall(s)
+     * are used to send data, applications should have a loop to handle
+     * EINTR returns.
+     */
+#if 24729
     int ret;
     OM_uint32 length;
 
@@ -53,11 +66,13 @@ send_token(int fd, gss_buffer_t token)
 	warnx("send_token could not write token\n");
 	return 1;
     }
+#endif
     return 0;
 }
 
 /*
- * Helper to receive a token on the specified fd, using our simple protocol.
+ * Helper to receive a token on the specified fd.
+ *
  * We must warnx() instead of errx() because compliant GSS applications must
  * release resources allocated by the GSS library before exiting.  (These
  * resources may be non-local to the current process.)
@@ -65,6 +80,17 @@ send_token(int fd, gss_buffer_t token)
 static int
 receive_token(int fd, gss_buffer_t token)
 {
+    /*
+     * Supply token framing and transmission code here.
+     *
+     * In addition to checking for error returns from whichever syscall(s)
+     * are used to receive data, applications should have a loop to handle
+     * EINTR returns.
+     *
+     * This routine is assumed to allocate memory for the local copy of the
+     * received token, which must be freed with release_buffer().
+     */
+#if 24729
     int ret;
     OM_uint32 length;
 
@@ -90,11 +116,12 @@ receive_token(int fd, gss_buffer_t token)
 	return 1;
     }
     token->length = length;
+#endif
     return 0;
 }
 
 static void
-do_initiator(int readfd, int writefd)
+do_initiator(int readfd, int writefd, int anon)
 {
     int context_established = 0;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
@@ -127,9 +154,8 @@ do_initiator(int readfd, int writefd)
     /* Mutual authentication will require a token from acceptor to initiator,
      * and thus a second call to gss_init_sec_context(). */
     req_flags = GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG;
-#ifdef ANONYMOUS
-    req_flags |= GSS_C_ANON_FLAG;
-#endif
+    if (anon)
+	req_flags |= GSS_C_ANON_FLAG;
 
     while (!context_established) {
 	/* The initiator_cred_handle, mech_type, time_req, input_chan_bindings,
@@ -142,14 +168,14 @@ do_initiator(int readfd, int writefd)
 				     &ret_flags, NULL);
 	/* This memory is no longer needed. */
 	release_buffer(&input_token);
-#ifdef ANONYMOUS
-	/* Initiators which wish to remain anonymous must check whether
-	 * their request has been honored before sending each context token. */
-	if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
-	    warnx("Anonymous processing not available\n");
-	    goto cleanup;
+	if (anon) {
+	    /* Initiators which wish to remain anonymous must check whether
+	     * their request has been honored before sending each token. */
+	    if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
+		warnx("Anonymous processing not available\n");
+		goto cleanup;
+	    }
 	}
-#endif
 	/* Always send a token if we are expecting another input token
 	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
@@ -264,17 +290,29 @@ cleanup:
 int main(int argc, char **argv)
 {
     pid_t pid;
+    int fd1, fd2;
 
+#if 24729
     if (pipe(pipefds_itoa) != 0)
 	err(1, "pipe failed for itoa\n");
     if (pipe(pipefds_atoi) != 0)
 	err(1, "pipe failed for atoi\n");
     pid = fork();
     if (pid == 0)
-	do_initiator(pipefds_atoi[0], pipefds_itoa[1]);
+	do_initiator(pipefds_atoi[0], pipefds_itoa[1], 0);
     else if (pid > 0)
 	do_acceptor(pipefds_itoa[0], pipefds_atoi[1]);
     else
 	err(1, "fork() failed\n");
+#else
+    /* Create fds for reading/writing here. */
+    pid = fork();
+    if (pid == 0)
+	do_initiator(fd1, fd2, 0);
+    else if (pid > 0)
+	do_acceptor(fd2, fd1);
+    else
+	err(1, "fork() failed\n");
+#endif
     exit(0);
 }
