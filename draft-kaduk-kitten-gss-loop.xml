@@ -89,9 +89,10 @@
 	parameter, which will contain a message from the acceptor
 	after the initial call, and the input_context_handle, which
 	must be the result returned in the output_context_handle of
-	the previous call to GSS_Init_sec_context() (or GSS_C_NO_CONTEXT
+	the previous call to GSS_Init_sec_context() (GSS_C_NO_CONTEXT
 	for the first call).  (In the C bindings, there is only a single
-	read/modify context_handle argument.)  RFC 2743 only requires that
+	read/modify context_handle argument, so the same variable should
+	be passed for each call in the loop.)  RFC 2743 only requires that
 	the claimant_cred_handle argument remain constant over all calls in
 	the loop, but the other non-excepted arguments should also remain
 	fixed for reliable operation.
@@ -107,7 +108,7 @@
       <section anchor="anon" title="Anonymous Initiators">
 	<t>If the initiator is requesting anonymity by setting the
 	  anon_req_flag input to GSS_Init_sec_context(), then on
-	  non-error returns from GSS_Init_sec_context() (that is,
+	  non-error returns from GSS_Init_sec_context() (that is, when
 	  the major status is GSS_S_COMPLETE or GSS_S_CONTINUE_NEEDED),
 	  the initiator must verify that the output value of anon_state
 	  from GSS_Init_sec_context() is true before sending the
@@ -250,7 +251,6 @@
 	    <t>If the major status code is GSS_S_CONTINUE_NEEDED and the
 	      output_token is empty, the mechanism has produced an
 	      output which is not compliant with <xref target="RFC2743" />.
-	      output which is not compliant with <xref target="RFC2743" />.
 	      However, there are some known implementations of certain
 	      mechanisms which do produce empty context negotiation
 	      tokens.  For maximum interoperability, applications should
@@ -334,8 +334,8 @@
 	to GSS_Init_sec_context() values for the following booleans:
 	deleg_req_flag, mutual_req_flag, replay_det_req_flag,
 	sequence_req_flag, conf_req_flag, and integ_req_flag.  Upon
-	completion of security context negotiation, the initiator must
-	verify the values of the deleg_state, mutual_state, replay_det_state,
+	completion of security context negotiation, the initiator must verify
+	that the values of the deleg_state, mutual_state, replay_det_state,
 	sequence_state, conf_avail, and integ_avail flags
 	from the last call to GSS_Init_sec_context()
 	corresponding to the requested flags.  If a flag was requested
@@ -343,7 +343,7 @@
 	appplication protocol, the initiator must destroy the security
 	context and not use the security context for application traffic.</t>
       <t>Application protocol specifications citing this document
-	should indicate which context flags are required for the application
+	should indicate which context flags are required for their application
 	protocol.</t>
       <t>The acceptor receives as output the following booleans:
 	deleg_state, mutual_state, replay_det_state, sequence_state,
@@ -359,10 +359,15 @@
 	  exchanges, an application protocol may find it desirable to
 	  begin sending application data protected with GSS per-message
 	  operations while continuing to exchange security context tokens
-	  to complete the security context negotiation.  The
+	  to complete the security context negotiation.  For example,
+	  an application may wish to reduce the number of round trips
+	  before application data is transmitted.  The
 	  prot_ready_state output value from GSS_Init_sec_context() and
 	  GSS_Accept_sec_context() indicates when per-message operations
-	  are avaialble.</t>
+	  are avaialble.  Applications using per-message operations
+	  on a partially complete security context must ensure that
+	  there is some mechanism in place to prevent replays of those
+	  messages.</t>
 	<t>Applications requiring confidentiality and/or integrity
 	  protection from such messages must check the value of the
 	  conf_avail and/or integ_avail output flags from
@@ -407,17 +412,20 @@
 	a regular application and for an application where the initiator
 	wishes to remain anonymous.  Since the code for the two cases is
 	very similar, the anonymous-specific additions are wrapped in
-	preprocessor conditionals which may be ignored if anonymous processing
-	is not needed.</t>
+	a conditional check; that check and the conditional code may be
+	ignored if anonymous processing is not needed.</t>
       <t> Since the communication channel
 	between the initiator and acceptor is a matter for individual
 	application protocols, it is inherently unspecified at the GSS-API
 	level, which can lead to examples that are less satisfying than
 	may be desired.  For example, the sample code in
 	<xref target="RFC2744" /> uses an unspecified send_token_to_peer()
-	routine.  In the interest of concreteness, this sample code
-	uses pipes for communication between initiator and acceptor, so that
-	explicit read() and write() may be used.</t>
+	routine.  Fully correct and general code to frame and transmit
+	tokens requires a substantial amount of error checking and would
+	detract from the core purpose of this document, so we only
+	present the function signature for one example of what such
+	functions might be, and leave some comments in the otherwise-empty
+	function bodies.</t>
       <t>This sample code is written in C, using the GSS-API C bindings
 	<xref target="RFC2744" />.  It uses the macro GSS_ERROR() to
 	help unpack the various sorts of information which can be stored in the
@@ -426,8 +434,10 @@
 	need to exercise care that checks against the major status value
 	are written correctly.</t>
       <t>This sample code should be compilable as a standalone program,
-	linked against a GSS-API library.  With most implementations, in
-	order for it to successfully run, the initiator will need to
+	linked against a GSS-API library.  In addition to supplying
+	implementations for the token transmission/receipt routines,
+	in order for the program to successfully run when linked against
+	most GSS-API libraries, the initiator will need to
 	specify an explicit target name for the acceptor (which must match
 	the credentials available to the acceptor).  A skeleton for how
 	this may be done is provided, in a disabled block of code.</t>
@@ -722,12 +732,12 @@ int main(int argc, char **argv)
 	negotiation loop.  Since everything relating to the construction
 	and use of a GSS security context is security-related, there
 	are security-relevant considerations throughout the document.
-	It is useul to call out a few things in this section, though.</t>
+	It is useful to call out a few things in this section, though.</t>
       <t>The GSS-API uses a request-and-check model for features.  An
 	application using the GSS-API requests that certain features
-	(confidentiality protection for messages, or anonynimity), but
+	(confidentiality protection for messages, or anonymity), but
 	such a request does not require the GSS implementation to provide
-	the feature.  The application must check the returned flags to
+	that feature.  The application must check the returned flags to
 	verify whether a requested feature is present; if the feature
 	was non-optional for the application, the application must generate
 	an error.  Phrased differently, the GSS-API will not generate an
