@@ -6,6 +6,8 @@
 #include <string.h>
 #include <gssapi/gssapi.h>
 
+#define KADUK	24729
+#if KADUK
 /*
  * Pipes for communication between initiator and acceptor.
  * We use a very simple communication protocol, that can only ever
@@ -15,6 +17,7 @@
  */
 int pipefds_itoa[2];
 int pipefds_atoi[2];
+#endif
 
 /*
  * This helper is used only on buffers that we allocate ourselves (e.g.,
@@ -50,7 +53,7 @@ send_token(int fd, gss_buffer_t token)
      * are used to send data, applications should have a loop to handle
      * EINTR returns.
      */
-#if 24729
+#if KADUK
     int ret;
     OM_uint32 length;
 
@@ -90,7 +93,7 @@ receive_token(int fd, gss_buffer_t token)
      * This routine is assumed to allocate memory for the local copy of the
      * received token, which must be freed with release_buffer().
      */
-#if 24729
+#if KADUK
     int ret;
     OM_uint32 length;
 
@@ -134,7 +137,7 @@ do_initiator(int readfd, int writefd, int anon)
     memset(&output_token, 0, sizeof(output_token));
 
     /* Applications should set target_name to a real value. */
-#if 24729
+#if KADUK
     gss_buffer_desc name_buf;
     name_buf.value = "kaduk";
     name_buf.length = 5;
@@ -292,7 +295,7 @@ int main(int argc, char **argv)
     pid_t pid;
     int fd1, fd2;
 
-#if 24729
+#if KADUK
     if (pipe(pipefds_itoa) != 0)
 	err(1, "pipe failed for itoa\n");
     if (pipe(pipefds_atoi) != 0)
