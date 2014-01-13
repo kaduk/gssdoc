@@ -293,7 +293,7 @@ cleanup:
 int main(int argc, char **argv)
 {
     pid_t pid;
-    int fd1, fd2;
+    int fd1 = -1, fd2 = -1;
 
 #if KADUK
     if (pipe(pipefds_itoa) != 0)
