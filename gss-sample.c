@@ -35,9 +35,9 @@ release_buffer(gss_buffer_t buf)
 /*
  * Helper to send a token on the specified fd.
  *
- * We must warnx() instead of errx() because compliant GSS applications must
- * release resources allocated by the GSS library before exiting.  (These
- * resources may be non-local to the current process.)
+ * We must warnx() instead of errx() because compliant GSS applications
+ * must release resources allocated by the GSS library before exiting.
+ * (These resources may be non-local to the current process.)
  */
 static int
 send_token(int fd, gss_buffer_t token)
@@ -45,13 +45,13 @@ send_token(int fd, gss_buffer_t token)
     /*
      * Supply token framing and transmission code here.
      *
-     * It is advisable for the application protocol to specify the length
-     * of the token being transmitted, unless the underlying transit
-     * does so implicitly.
+     * It is advisable for the application protocol to specify the
+     * length of the token being transmitted, unless the underlying
+     * transit does so implicitly.
      *
-     * In addition to checking for error returns from whichever syscall(s)
-     * are used to send data, applications should have a loop to handle
-     * EINTR returns.
+     * In addition to checking for error returns from whichever
+     * syscall(s) are used to send data, applications should have
+     * a loop to handle EINTR returns.
      */
 #if KADUK
     int ret;
@@ -76,9 +76,9 @@ send_token(int fd, gss_buffer_t token)
 /*
  * Helper to receive a token on the specified fd.
  *
- * We must warnx() instead of errx() because compliant GSS applications must
- * release resources allocated by the GSS library before exiting.  (These
- * resources may be non-local to the current process.)
+ * We must warnx() instead of errx() because compliant GSS applications
+ * must release resources allocated by the GSS library before exiting.
+ * (These resources may be non-local to the current process.)
  */
 static int
 receive_token(int fd, gss_buffer_t token)
@@ -86,12 +86,12 @@ receive_token(int fd, gss_buffer_t token)
     /*
      * Supply token framing and transmission code here.
      *
-     * In addition to checking for error returns from whichever syscall(s)
-     * are used to receive data, applications should have a loop to handle
-     * EINTR returns.
+     * In addition to checking for error returns from whichever
+     * syscall(s) are used to receive data, applications should have
+     * a loop to handle EINTR returns.
      *
-     * This routine is assumed to allocate memory for the local copy of the
-     * received token, which must be freed with release_buffer().
+     * This routine is assumed to allocate memory for the local copy
+     * of the received token, which must be freed with release_buffer().
      */
 #if KADUK
     int ret;
@@ -149,31 +149,34 @@ do_initiator(int readfd, int writefd, int anon)
     gss_buffer_desc name_buf;
     name_buf.value = "<service>@<hostname.domain>";
     name_buf.length = strlen(name_buf.value);
-    major = gss_import_name(&minor, &name_buf, GSS_C_NT_HOSTBASED_SERVICE,
-			    &target_name);
-    /* target_name must be released with gss_release_name() at cleanup. */
+    major = gss_import_name(&minor, &name_buf,
+			    GSS_C_NT_HOSTBASED_SERVICE, &target_name);
+    /* target_name must be freed with gss_release_name() at cleanup. */
 #endif
 
-    /* Mutual authentication will require a token from acceptor to initiator,
-     * and thus a second call to gss_init_sec_context(). */
+    /* Mutual authentication will require a token from acceptor to
+     * initiator, and thus a second call to gss_init_sec_context(). */
     req_flags = GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG;
     if (anon)
 	req_flags |= GSS_C_ANON_FLAG;
 
     while (!context_established) {
-	/* The initiator_cred_handle, mech_type, time_req, input_chan_bindings,
-	 * actual_mech_type, and time_rec parameters are not needed in many
-	 * cases.  We pass GSS_C_NO_CREDENTIAL, GSS_C_NO_OID, 0, NULL, NULL,
-	 * and NULL for them, respectively. */
+	/* The initiator_cred_handle, mech_type, time_req,
+	 * input_chan_bindings, actual_mech_type, and time_rec
+	 * parameters are not needed in many cases.  We pass
+	 * GSS_C_NO_CREDENTIAL, GSS_C_NO_OID, 0, NULL, NULL, and NULL
+	 * for them, respectively. */
 	major = gss_init_sec_context(&minor, GSS_C_NO_CREDENTIAL, &ctx,
-				     target_name, GSS_C_NO_OID, req_flags, 0,
-				     NULL, &input_token, NULL, &output_token,
-				     &ret_flags, NULL);
+				     target_name, GSS_C_NO_OID,
+				     req_flags, 0, NULL, &input_token,
+				     NULL, &output_token, &ret_flags,
+				     NULL);
 	/* This memory is no longer needed. */
 	release_buffer(&input_token);
 	if (anon) {
-	    /* Initiators which wish to remain anonymous must check whether
-	     * their request has been honored before sending each token. */
+	    /* Initiators which wish to remain anonymous must check
+	     * whether * their request has been honored before sending
+	     * each token. */
 	    if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
 		warnx("Anonymous processing not available\n");
 		goto cleanup;
@@ -204,7 +207,7 @@ do_initiator(int readfd, int writefd, int anon)
 	    context_established = 1;
 	} else {
 	    /* This situation is forbidden by RFC 2743.  Bail out. */
-	    warnx("major not complete or continue-needed but not error\n");
+	    warnx("major not complete or continue but not error\n");
 	    goto cleanup;
 	}
     }	/* while(!context_established) */
@@ -214,7 +217,7 @@ do_initiator(int readfd, int writefd, int anon)
     }
     printf("Initiator's context negotiation successful\n");
 cleanup:
-    /* It is safe to call gss_release_buffer twice on the same buffer. */
+    /* It is safe to call gss_release_buffer twice on the same buf. */
     (void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token; pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
@@ -245,19 +248,23 @@ do_acceptor(int readfd, int writefd)
 	    break;
 	} else {
 	    /* This situation is forbidden by RFC 2743.  Bail out. */
-	    warnx("major not complete or continue-needed but not error\n");
+	    warnx("major not complete or continue but not error\n");
 	    goto cleanup;
 	}
 	/* We can use the default behavior or do not need the returned
 	 * information for the parameters acceptor_cred_handle,
-	 * input_chan_bindings, mech_type, time_rec, and delegated_cred_handle
-	 * and pass the values GSS_C_NO_CREDENTIAL, NULL, NULL, NULL, and NULL,
-	 * respectively.  In some cases the src_name will not be needed, but
-	 * most likely it will be needed for some authorization or logging
-	 * functionality. */
-	major = gss_accept_sec_context(&minor, &ctx, GSS_C_NO_CREDENTIAL,
-				       &input_token, NULL, &client_name, NULL,
-				       &output_token, &ret_flags, NULL, NULL);
+	 * input_chan_bindings, mech_type, time_rec, and
+	 * delegated_cred_handle and pass the values
+	 * GSS_C_NO_CREDENTIAL, NULL, NULL, NULL, and NULL,
+	 * respectively.  In some cases the src_name will not be
+	 * needed, but most likely it will be needed for some
+	 * authorization or logging functionality. */
+	major = gss_accept_sec_context(&minor, &ctx,
+				       GSS_C_NO_CREDENTIAL,
+				       &input_token, NULL,
+				       &client_name, NULL,
+				       &output_token, &ret_flags, NULL,
+				       NULL);
 	/* Release memory no longer needed. */
 	release_buffer(&input_token);
 	/* Always send a token if we are expecting another input token
@@ -274,7 +281,7 @@ do_acceptor(int readfd, int writefd)
 	    warnx("gss_accept_sec_context() error major 0x%x\n", major);
 	    goto cleanup;
 	}
-	/* Release the output token's storage; we don't need it anymore. */
+	/* Free the output token's storage; we don't need it anymore. */
 	(void)gss_release_buffer(&minor, &output_token);
     }	/* while(!context_established) */
     if ((ret_flags & GSS_C_INTEG_FLAG) != GSS_C_INTEG_FLAG) {
@@ -283,7 +290,7 @@ do_acceptor(int readfd, int writefd)
     }
     printf("Acceptor's context negotiation successful\n");
 cleanup:
-    /* It is safe to call gss_release_buffer twice on the same buffer. */
+    /* It is safe to call gss_release_buffer twice on the same buf. */
     release_buffer(&input_token);
     /* Do not request a context deletion token, pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
