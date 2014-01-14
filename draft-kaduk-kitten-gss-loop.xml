@@ -9,7 +9,7 @@
 <!ENTITY RFC4752 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4752.xml">
 <!ENTITY RFC4401 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml">
 ]>
-<rfc category="info" ipr="trust200902" docName="draft-kaduk-kitten-gss-loop-01" submissionType="IETF">
+<rfc category="info" ipr="trust200902" docName="draft-kaduk-kitten-gss-loop-02" submissionType="IETF">
   <front>
     <title>Structure of the GSS Negotiation Loop</title>
     <author initials="B." surname="Kaduk" fullname="Benjamin Kaduk">
@@ -18,7 +18,7 @@
         <email>kaduk@mit.edu</email>
       </address>
     </author>
-    <date month="November" year="2013"/>
+    <date month="January" year="2014"/>
     <abstract>
       <t>This document specifies the generic structure of the negotiation
 	loop to establish a GSS security context between initiator and
