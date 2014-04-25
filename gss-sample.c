@@ -177,7 +177,7 @@ do_initiator(int readfd, int writefd, int anon)
 	    /* Initiators which wish to remain anonymous must check
 	     * whether * their request has been honored before sending
 	     * each token. */
-	    if ((ret_flags & GSS_C_ANON_FLAG) != GSS_C_ANON_FLAG) {
+	    if (!(ret_flags & GSS_C_ANON_FLAG)) {
 		warnx("Anonymous processing not available\n");
 		goto cleanup;
 	    }
@@ -286,7 +286,7 @@ do_acceptor(int readfd, int writefd)
 	/* Free the output token's storage; we don't need it anymore. */
 	(void)gss_release_buffer(&minor, &output_token);
     }	/* while(!context_established) */
-    if ((ret_flags & GSS_C_INTEG_FLAG) != GSS_C_INTEG_FLAG) {
+    if (!(ret_flags & GSS_C_INTEG_FLAG)) {
 	warnx("Negotiated context does not support integrity\n");
 	goto cleanup;
     }
