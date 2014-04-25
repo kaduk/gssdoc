@@ -198,6 +198,7 @@ do_initiator(int readfd, int writefd, int anon)
 	}
 	/* Having sent any output_token, release the storage for it. */
 	(void)gss_release_buffer(&minor, &output_token);
+	output_token.value = NULL;
 
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
 	    ret = receive_token(readfd, &input_token);
@@ -217,8 +218,8 @@ do_initiator(int readfd, int writefd, int anon)
     }
     printf("Initiator's context negotiation successful\n");
 cleanup:
-    /* It is safe to call gss_release_buffer twice on the same buf. */
-    (void)gss_release_buffer(&minor, &output_token);
+    if (output_token.value != NULL)
+	(void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token; pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
 }
@@ -267,6 +268,7 @@ do_acceptor(int readfd, int writefd)
 				       NULL);
 	/* Release memory no longer needed. */
 	release_buffer(&input_token);
+	input_token.value = NULL;
 	/* Always send a token if we are expecting another input token
 	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
@@ -290,8 +292,8 @@ do_acceptor(int readfd, int writefd)
     }
     printf("Acceptor's context negotiation successful\n");
 cleanup:
-    /* It is safe to call gss_release_buffer twice on the same buf. */
-    release_buffer(&input_token);
+    if (input_token.value != NULL)
+	release_buffer(&input_token);
     /* Do not request a context deletion token, pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
     (void)gss_release_name(&minor, &client_name);
