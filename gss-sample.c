@@ -225,6 +225,40 @@ cleanup:
 }
 
 static void
+check_authorization(gss_name_t client)
+{
+    gss_buffer_desc data, display;
+    OM_uint32 major, minor;
+    char const authorized_name[] =
+	"\x04\x01\x00\x0b\x06\x09\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"
+	"\x00\x00\x00\x12kaduk@ZONE.MIT.EDU";
+
+    memset(&data, 0, sizeof(data));
+    memset(&display, 0, sizeof(display));
+
+    major = gss_display_name(&minor, client, &display, NULL);
+    if (GSS_ERROR(major)) {
+	printf("Could not obtain a display name\n");
+	return;
+    }
+    major = gss_export_name(&minor, client, &data);
+    if (GSS_ERROR(major)) {
+	printf("Could not obtain an exported name for %*s\n",
+	       (int)display.length, display.value);
+	return;
+    }
+    if (sizeof(authorized_name) - 1 != data.length ||
+	memcmp(data.value, authorized_name, data.length) != 0) {
+	printf("Initiator %*s is not authorized\n", (int)display.length,
+	       display.value);
+	return;
+    }
+    printf("Initiator %*s successfully authorized\n", (int)display.length,
+	   display.value);
+    return;
+}
+
+static void
 do_acceptor(int readfd, int writefd)
 {
     int context_established = 0, ret;
@@ -291,6 +325,7 @@ do_acceptor(int readfd, int writefd)
 	goto cleanup;
     }
     printf("Acceptor's context negotiation successful\n");
+    check_authorization(client_name);
 cleanup:
     if (input_token.value != NULL)
 	release_buffer(&input_token);
