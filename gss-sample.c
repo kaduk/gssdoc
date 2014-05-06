@@ -126,7 +126,7 @@ receive_token(int fd, gss_buffer_t token)
 static void
 do_initiator(int readfd, int writefd, int anon)
 {
-    int context_established = 0;
+    int initiator_established = 0;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     OM_uint32 major, minor, req_flags, ret_flags;
     gss_buffer_desc input_token, output_token;
@@ -160,7 +160,7 @@ do_initiator(int readfd, int writefd, int anon)
     if (anon)
 	req_flags |= GSS_C_ANON_FLAG;
 
-    while (!context_established) {
+    while (!initiator_established) {
 	/* The initiator_cred_handle, mech_type, time_req,
 	 * input_chan_bindings, actual_mech_type, and time_rec
 	 * parameters are not needed in many cases.  We pass
@@ -205,13 +205,13 @@ do_initiator(int readfd, int writefd, int anon)
 	    if (ret != 0)
 		goto cleanup;
 	} else if (major == GSS_S_COMPLETE) {
-	    context_established = 1;
+	    initiator_established = 1;
 	} else {
 	    /* This situation is forbidden by RFC 2743.  Bail out. */
 	    warnx("major not complete or continue but not error\n");
 	    goto cleanup;
 	}
-    }	/* while(!context_established) */
+    }	/* while(!initiator_established) */
     if ((ret_flags & req_flags) != req_flags) {
 	warnx("Negotiated context does not support requested flags\n");
 	goto cleanup;
@@ -227,7 +227,7 @@ cleanup:
 static void
 do_acceptor(int readfd, int writefd)
 {
-    int context_established = 0, ret;
+    int acceptor_established = 0, ret;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     OM_uint32 major, minor, ret_flags;
     gss_buffer_desc input_token, output_token;
@@ -236,16 +236,15 @@ do_acceptor(int readfd, int writefd)
     memset(&input_token, 0, sizeof(input_token));
     memset(&output_token, 0, sizeof(output_token));
 
-    context_established = 0;
     major = GSS_S_CONTINUE_NEEDED;
 
-    while(!context_established) {
+    while(!acceptor_established) {
 	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
 	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
 	} else if (major == GSS_S_COMPLETE) {
-	    context_established = 1;
+	    acceptor_established = 1;
 	    break;
 	} else {
 	    /* This situation is forbidden by RFC 2743.  Bail out. */
@@ -285,7 +284,7 @@ do_acceptor(int readfd, int writefd)
 	}
 	/* Free the output token's storage; we don't need it anymore. */
 	(void)gss_release_buffer(&minor, &output_token);
-    }	/* while(!context_established) */
+    }	/* while(!acceptor_established) */
     if (!(ret_flags & GSS_C_INTEG_FLAG)) {
 	warnx("Negotiated context does not support integrity\n");
 	goto cleanup;
