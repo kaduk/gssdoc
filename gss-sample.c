@@ -15,8 +15,8 @@
  * The framing is that we write a 32-bit unsigned integer which is
  * the byte count of the following token, followed by the token.
  */
-int pipefds_itoa[2];
-int pipefds_atoi[2];
+static int pipefds_itoa[2];
+static int pipefds_atoi[2];
 #endif
 
 /*
@@ -54,11 +54,15 @@ send_token(int fd, gss_buffer_t token)
      * a loop to handle EINTR returns.
      */
 #if KADUK
-    int ret;
+    ssize_t ret;
     OM_uint32 length;
 
     assert(sizeof(length) == 4);
-    length = token->length;
+    if (token->length > UINT32_MAX) {
+	warnx("send_token received token too large for framing\n");
+	return 1;
+    }
+    length = (OM_uint32)token->length;
     ret = write(fd, &length, 4);
     if (ret != 4) {
 	warnx("send_token could not write length\n");
@@ -94,7 +98,7 @@ receive_token(int fd, gss_buffer_t token)
      * of the received token, which must be freed with release_buffer().
      */
 #if KADUK
-    int ret;
+    ssize_t ret;
     OM_uint32 length;
 
     assert(sizeof(length) == 4);
@@ -126,12 +130,11 @@ receive_token(int fd, gss_buffer_t token)
 static void
 do_initiator(int readfd, int writefd, int anon)
 {
-    int initiator_established = 0;
+    int initiator_established = 0, ret;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     OM_uint32 major, minor, req_flags, ret_flags;
     gss_buffer_desc input_token, output_token;
     gss_name_t target_name = GSS_C_NO_NAME;
-    OM_uint32 ret;
 
     memset(&input_token, 0, sizeof(input_token));
     memset(&output_token, 0, sizeof(output_token));
@@ -298,7 +301,8 @@ cleanup:
     (void)gss_release_name(&minor, &client_name);
 }
 
-int main(int argc, char **argv)
+int
+main(void)
 {
     pid_t pid;
     int fd1 = -1, fd2 = -1;
