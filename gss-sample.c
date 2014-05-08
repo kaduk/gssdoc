@@ -194,7 +194,8 @@ do_initiator(int readfd, int writefd, int anon)
 	}
 	/* Always send a token if we are expecting another input token
 	 * (GSS_S_CONTINUE_NEEDED is set) or if it is nonempty. */
-	if ((major & GSS_S_CONTINUE_NEEDED) || output_token.length > 0) {
+	if ((major & GSS_S_CONTINUE_NEEDED) ||
+	    output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
 		goto cleanup;
