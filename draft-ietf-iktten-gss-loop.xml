@@ -440,7 +440,7 @@
 	most GSS-API libraries, the initiator will need to
 	specify an explicit target name for the acceptor (which must match
 	the credentials available to the acceptor).  A skeleton for how
-	this may be done is provided, in a disabled block of code.</t>
+	this may be done is provided, using a dummy name.</t>
       <t>This sample code assumes v2 of the GSS-API.  Applications wishing
 	to remain compatible with v1 of the GSS-API may need to perform
 	additional checks in some locations.
