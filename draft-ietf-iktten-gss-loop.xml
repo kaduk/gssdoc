@@ -580,7 +580,8 @@ do_initiator(int readfd, int writefd, int anon)
             goto cleanup;
         }
         /* Having sent any output_token, release the storage for it. */
-        (void)gss_release_buffer(&minor, &output_token);
+        if (output_token.length > 0)
+            (void)gss_release_buffer(&minor, &output_token);
         output_token.value = NULL;
 
         if (major & GSS_S_CONTINUE_NEEDED) {
