@@ -288,8 +288,12 @@ do_acceptor(int readfd, int writefd)
 	    warnx("gss_accept_sec_context() error major 0x%x\n", major);
 	    goto cleanup;
 	}
-	/* Free the output token's storage; we don't need it anymore. */
-	(void)gss_release_buffer(&minor, &output_token);
+	/* Free the output token's storage; we don't need it anymore.
+	 * RFC 2744 is explicit about the length check, whereas RFC 2743
+	 * has more generic "non-NULL" language which does not directly
+	 * apply to the C bindings. */
+	if (output_token.length > 0)
+	    (void)gss_release_buffer(&minor, &output_token);
 	output_token.value = NULL;
     }	/* while(!acceptor_established) */
     if (!(ret_flags & GSS_C_INTEG_FLAG)) {
