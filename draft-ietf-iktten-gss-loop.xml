@@ -210,8 +210,7 @@
 	  the initiator's state is invalid and fail the GSS negotiation.
 	  Again, it is likely appropriate for the acceptor to report
 	  this error condition to the initiator via the application's
-	  communication channel.</t>
-	<t>[Are there other checks to perform here?]
+	  communication channel.
 	</t>
       </section>
       <section anchor="accept" title="GSS_Accept_sec_context">
@@ -311,8 +310,7 @@
 	  the acceptor's state is invalid and fail the GSS negotiation.
 	  Again, it may be appropriate for the initiator to report this
 	  error condition to the acceptor via the application's communication
-	  channel.</t>
-	<t>[Are there other checks to perform here?]
+	  channel.
 	</t>
       </section>
       <section title="Continue the Loop">
