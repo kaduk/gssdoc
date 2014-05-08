@@ -35,7 +35,8 @@ release_buffer(gss_buffer_t buf)
 /*
  * Helper to send a token on the specified fd.
  *
- * We must warnx() instead of errx() because compliant GSS applications
+ * If errors are encountered, this routine must not directly cause termination
+ * of the process (i.e., by errx()), because compliant GSS applications
  * must release resources allocated by the GSS library before exiting.
  * (These resources may be non-local to the current process.)
  */
@@ -73,14 +74,17 @@ send_token(int fd, gss_buffer_t token)
 	warnx("send_token could not write token\n");
 	return 1;
     }
-#endif
     return 0;
+#else
+    return 1;
+#endif
 }
 
 /*
  * Helper to receive a token on the specified fd.
  *
- * We must warnx() instead of errx() because compliant GSS applications
+ * If errors are encountered, this routine must not directly cause termination
+ * of the process (i.e., by errx()), because compliant GSS applications
  * must release resources allocated by the GSS library before exiting.
  * (These resources may be non-local to the current process.)
  */
@@ -123,8 +127,10 @@ receive_token(int fd, gss_buffer_t token)
 	return 1;
     }
     token->length = length;
-#endif
     return 0;
+#else
+    return 1;
+#endif
 }
 
 static void
@@ -133,15 +139,15 @@ do_initiator(int readfd, int writefd, int anon)
     int initiator_established = 0, ret;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     OM_uint32 major, minor, req_flags, ret_flags;
-    gss_buffer_desc input_token, output_token;
+    gss_buffer_desc input_token, output_token, name_buf;
     gss_name_t target_name = GSS_C_NO_NAME;
 
     memset(&input_token, 0, sizeof(input_token));
     memset(&output_token, 0, sizeof(output_token));
+    memset(&name_buf, 0, sizeof(name_buf));
 
     /* Applications should set target_name to a real value. */
 #if KADUK
-    gss_buffer_desc name_buf;
     name_buf.value = "kaduk";
     name_buf.length = 5;
     major = gss_import_name(&minor, &name_buf, GSS_C_NT_USER_NAME,
@@ -149,12 +155,10 @@ do_initiator(int readfd, int writefd, int anon)
     if (GSS_ERROR(major))
 	errx(1, "Could not import name\n");
 #else
-    gss_buffer_desc name_buf;
     name_buf.value = "<service>@<hostname.domain>";
     name_buf.length = strlen(name_buf.value);
     major = gss_import_name(&minor, &name_buf,
 			    GSS_C_NT_HOSTBASED_SERVICE, &target_name);
-    /* target_name must be freed with gss_release_name() at cleanup. */
 #endif
 
     /* Mutual authentication will require a token from acceptor to
@@ -174,21 +178,20 @@ do_initiator(int readfd, int writefd, int anon)
 				     req_flags, 0, NULL, &input_token,
 				     NULL, &output_token, &ret_flags,
 				     NULL);
-	/* This memory is no longer needed. */
+	/* This was allocated by receive_token() and is no longer needed. */
 	release_buffer(&input_token);
 	if (anon) {
 	    /* Initiators which wish to remain anonymous must check
-	     * whether * their request has been honored before sending
+	     * whether their request has been honored before sending
 	     * each token. */
 	    if (!(ret_flags & GSS_C_ANON_FLAG)) {
-		warnx("Anonymous processing not available\n");
+		warnx("Anonymous processing requested but not available\n");
 		goto cleanup;
 	    }
 	}
 	/* Always send a token if we are expecting another input token
-	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
-	    output_token.length > 0) {
+	 * (GSS_S_CONTINUE_NEEDED is set) or if it is nonempty. */
+	if ((major & GSS_S_CONTINUE_NEEDED) || output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
 		goto cleanup;
@@ -203,7 +206,7 @@ do_initiator(int readfd, int writefd, int anon)
 	(void)gss_release_buffer(&minor, &output_token);
 	output_token.value = NULL;
 
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
+	if (major & GSS_S_CONTINUE_NEEDED) {
 	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
@@ -225,6 +228,7 @@ cleanup:
 	(void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token; pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
+    (void)gss_release_name(&minor, &target_name);
 }
 
 static void
@@ -242,7 +246,7 @@ do_acceptor(int readfd, int writefd)
     major = GSS_S_CONTINUE_NEEDED;
 
     while(!acceptor_established) {
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0) {
+	if (major & GSS_S_CONTINUE_NEEDED) {
 	    ret = receive_token(readfd, &input_token);
 	    if (ret != 0)
 		goto cleanup;
@@ -268,12 +272,11 @@ do_acceptor(int readfd, int writefd)
 				       &client_name, NULL,
 				       &output_token, &ret_flags, NULL,
 				       NULL);
-	/* Release memory no longer needed. */
+	/* This was allocated by receive_token() and is no longer needed. */
 	release_buffer(&input_token);
-	input_token.value = NULL;
 	/* Always send a token if we are expecting another input token
-	 * (GSS_S_CONTINUE_NEEDED) or if it is nonempty. */
-	if ((major & GSS_S_CONTINUE_NEEDED) != 0 ||
+	 * (GSS_S_CONTINUE_NEEDED is set) or if it is nonempty. */
+	if ((major & GSS_S_CONTINUE_NEEDED) ||
 	    output_token.length > 0) {
 	    ret = send_token(writefd, &output_token);
 	    if (ret != 0)
@@ -287,6 +290,7 @@ do_acceptor(int readfd, int writefd)
 	}
 	/* Free the output token's storage; we don't need it anymore. */
 	(void)gss_release_buffer(&minor, &output_token);
+	output_token.value = NULL;
     }	/* while(!acceptor_established) */
     if (!(ret_flags & GSS_C_INTEG_FLAG)) {
 	warnx("Negotiated context does not support integrity\n");
@@ -294,8 +298,9 @@ do_acceptor(int readfd, int writefd)
     }
     printf("Acceptor's context negotiation successful\n");
 cleanup:
-    if (input_token.value != NULL)
-	release_buffer(&input_token);
+    release_buffer(&input_token);
+    if (output_token.value != NULL)
+	(void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token, pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
     (void)gss_release_name(&minor, &client_name);
