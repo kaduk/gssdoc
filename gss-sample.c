@@ -35,10 +35,11 @@ release_buffer(gss_buffer_t buf)
 /*
  * Helper to send a token on the specified fd.
  *
- * If errors are encountered, this routine must not directly cause termination
- * of the process (i.e., by errx()), because compliant GSS applications
- * must release resources allocated by the GSS library before exiting.
- * (These resources may be non-local to the current process.)
+ * If errors are encountered, this routine must not directly cause
+ * termination of the process (i.e., by errx()), because compliant GSS
+ * applications must release resources allocated by the GSS library
+ * before exiting.  (These resources may be non-local to the current
+ * process.)
  */
 static int
 send_token(int fd, gss_buffer_t token)
@@ -83,10 +84,11 @@ send_token(int fd, gss_buffer_t token)
 /*
  * Helper to receive a token on the specified fd.
  *
- * If errors are encountered, this routine must not directly cause termination
- * of the process (i.e., by errx()), because compliant GSS applications
- * must release resources allocated by the GSS library before exiting.
- * (These resources may be non-local to the current process.)
+ * If errors are encountered, this routine must not directly cause
+ * termination of the process (i.e., by errx()), because compliant GSS
+ * applications must release resources allocated by the GSS library
+ * before exiting.  (These resources may be non-local to the current
+ * process.)
  */
 static int
 receive_token(int fd, gss_buffer_t token)
@@ -178,14 +180,15 @@ do_initiator(int readfd, int writefd, int anon)
 				     req_flags, 0, NULL, &input_token,
 				     NULL, &output_token, &ret_flags,
 				     NULL);
-	/* This was allocated by receive_token() and is no longer needed. */
+	/* This was allocated by receive_token() and is no longer
+	 * needed.  Free it now to avoid leaks if the loop continues. */
 	release_buffer(&input_token);
 	if (anon) {
 	    /* Initiators which wish to remain anonymous must check
 	     * whether their request has been honored before sending
 	     * each token. */
 	    if (!(ret_flags & GSS_C_ANON_FLAG)) {
-		warnx("Anonymous processing requested but not available\n");
+		warnx("Anonymous requested but not available\n");
 		goto cleanup;
 	    }
 	}
@@ -273,7 +276,8 @@ do_acceptor(int readfd, int writefd)
 				       &client_name, NULL,
 				       &output_token, &ret_flags, NULL,
 				       NULL);
-	/* This was allocated by receive_token() and is no longer needed. */
+	/* This was allocated by receive_token() and is no longer
+	 * needed.  Free it now to avoid leaks if the loop continues. */
 	release_buffer(&input_token);
 	/* Always send a token if we are expecting another input token
 	 * (GSS_S_CONTINUE_NEEDED is set) or if it is nonempty. */
