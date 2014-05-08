@@ -206,10 +206,11 @@ do_initiator(int readfd, int writefd, int anon)
 	    warnx("gss_init_sec_context() error major 0x%x\n", major);
 	    goto cleanup;
 	}
-	/* Having sent any output_token, release the storage for it. */
-	if (output_token.length > 0)
-	    (void)gss_release_buffer(&minor, &output_token);
-	output_token.value = NULL;
+	/* Free the output token's storage; we don't need it anymore.
+	 * gss_release_buffer() is safe to call on the output buffer
+	 * from gss_int_sec_context(), even if there is no storage
+	 * associated with that buffer. */
+	(void)gss_release_buffer(&minor, &output_token);
 
 	if (major & GSS_S_CONTINUE_NEEDED) {
 	    ret = receive_token(readfd, &input_token);
@@ -229,7 +230,10 @@ do_initiator(int readfd, int writefd, int anon)
     }
     printf("Initiator's context negotiation successful\n");
 cleanup:
-    if (output_token.value != NULL)
+    /* We are required to release storage for nonzero-length output
+     * tokens.  gss_release_buffer() zeros the length, so we are
+     * will not attempt to release the same buffer twice. */
+    if (output_token.length > 0)
 	(void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token; pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
@@ -295,12 +299,10 @@ do_acceptor(int readfd, int writefd)
 	    goto cleanup;
 	}
 	/* Free the output token's storage; we don't need it anymore.
-	 * RFC 2744 is explicit about the length check, whereas RFC 2743
-	 * has more generic "non-NULL" language which does not directly
-	 * apply to the C bindings. */
-	if (output_token.length > 0)
-	    (void)gss_release_buffer(&minor, &output_token);
-	output_token.value = NULL;
+	 * gss_release_buffer() is safe to call on the output buffer
+	 * from gss_accept_sec_context(), even if there is no storage
+	 * associated with that buffer. */
+	(void)gss_release_buffer(&minor, &output_token);
     }	/* while(!acceptor_established) */
     if (!(ret_flags & GSS_C_INTEG_FLAG)) {
 	warnx("Negotiated context does not support integrity\n");
@@ -309,7 +311,10 @@ do_acceptor(int readfd, int writefd)
     printf("Acceptor's context negotiation successful\n");
 cleanup:
     release_buffer(&input_token);
-    if (output_token.value != NULL)
+    /* We are required to release storage for nonzero-length output
+     * tokens.  gss_release_buffer() zeros the length, so we are
+     * will not attempt to release the same buffer twice. */
+    if (output_token.length > 0)
 	(void)gss_release_buffer(&minor, &output_token);
     /* Do not request a context deletion token, pass NULL. */
     (void)gss_delete_sec_context(&minor, &ctx, NULL);
