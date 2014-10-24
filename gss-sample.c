@@ -1,12 +1,14 @@
+#define KADUK	24729
 #include <unistd.h>
+#if KADUK
 #include <assert.h>
+#endif
 #include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <gssapi/gssapi.h>
 
-#define KADUK	24729
 #if KADUK
 /*
  * Pipes for communication between initiator and acceptor.
