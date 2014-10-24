@@ -329,11 +329,12 @@
 	to GSS_Init_sec_context() values for the following booleans:
 	deleg_req_flag, mutual_req_flag, replay_det_req_flag,
 	sequence_req_flag, conf_req_flag, and integ_req_flag.  Upon
-	completion of security context negotiation, the initiator must verify
+	completion of the security context negotiation,
+	the initiator must verify
 	that the values of the deleg_state, mutual_state, replay_det_state,
 	sequence_state, conf_avail, and integ_avail flags
 	from the last call to GSS_Init_sec_context()
-	corresponding to the requested flags.  If a flag was requested
+	correspond to the requested flags.  If a flag was requested
 	but is not available, and that feature is necessary for the
 	appplication protocol, the initiator must destroy the security
 	context and not use the security context for application traffic.</t>
@@ -359,7 +360,7 @@
 	  before application data is transmitted.  The
 	  prot_ready_state output value from GSS_Init_sec_context() and
 	  GSS_Accept_sec_context() indicates when per-message operations
-	  are avaialble.  Applications using per-message operations
+	  are available.  Applications using per-message operations
 	  on a partially complete security context must ensure that
 	  there is some mechanism in place to prevent replays of those
 	  messages.</t>
