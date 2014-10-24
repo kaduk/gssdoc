@@ -100,10 +100,7 @@
       <t>The following subsections will describe the various steps of
 	the loop, without special consideration to whether a call
 	to GSS_Init_sec_context() or GSS_Accept_sec_context() is the
-	first such call in the loop.  For the first call to each
-	routine in the loop, the major status code from the previous
-	call to GSS_Init_sec_context() or GSS_Accept_sec_context() should
-	be taken as GSS_S_CONTINUE_NEEDED.
+	first such call in the loop.
       </t>
       <section anchor="anon" title="Anonymous Initiators">
 	<t>If the initiator is requesting anonymity by setting the
