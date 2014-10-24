@@ -143,12 +143,10 @@ do_initiator(int readfd, int writefd, int anon)
     int initiator_established = 0, ret;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     OM_uint32 major, minor, req_flags, ret_flags;
-    gss_buffer_desc input_token, output_token, name_buf;
+    gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc name_buf = GSS_C_EMPTY_BUFFER;
     gss_name_t target_name = GSS_C_NO_NAME;
-
-    memset(&input_token, 0, sizeof(input_token));
-    memset(&output_token, 0, sizeof(output_token));
-    memset(&name_buf, 0, sizeof(name_buf));
 
     /* Applications should set target_name to a real value. */
 #if KADUK
@@ -248,7 +246,8 @@ do_acceptor(int readfd, int writefd)
     int acceptor_established = 0, ret;
     gss_ctx_id_t ctx = GSS_C_NO_CONTEXT;
     OM_uint32 major, minor, ret_flags;
-    gss_buffer_desc input_token, output_token;
+    gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
     gss_name_t client_name;
 
     memset(&input_token, 0, sizeof(input_token));
