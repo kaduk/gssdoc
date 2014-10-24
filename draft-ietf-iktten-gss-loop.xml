@@ -48,7 +48,7 @@
 	Accordingly, the application's control flow must include a loop
 	within which GSS security context tokens are exchanged, which
 	terminates upon successful establishment of a security context
-	(or an error condition).
+	or an error condition.
       </t>
       <t>The GSS-API C bindings <xref target="RFC2744" /> provide some
 	example code for such a negotiation loop, but this code does not
@@ -216,8 +216,8 @@
 	  to calls to GSS_Accept_sec_context().  The input_context_handle
 	  parameter will always be given as the output_context_handle
 	  from the previous call to GSS_Accept_sec_context() in a
-	  given negotiation loop (or GSS_C_NO_CONTEXT on the first
-	  call), but the acceptor_cred_handle and chan_bindings arguments
+	  given negotiation loop, or GSS_C_NO_CONTEXT on the first
+	  call, but the acceptor_cred_handle and chan_bindings arguments
 	  should remain fixed over the course of a given GSS negotiation
 	  loop.  <xref target="RFC2743" /> only requires that the
 	  acceptor_cred_handle remain fixed throughout the loop, but
@@ -271,8 +271,7 @@
 	  being sent as an RPC output parameter.  Application protocol
 	  specifications will need to specify the nature of this behavior.</t>
         <t>If the application protocol has the initiator driving the
-	  application's control flow (with the acceptor just responding to
-	  actions from the initiator), it is particularly helpful for
+	  application's control flow, it is particularly helpful for
 	  the acceptor to indicate a failure to the initiator, as mentioned
 	  in some of the above cases conditional on "an appropriate channel
 	  to do so".</t>
@@ -321,10 +320,10 @@
       <t>Once a party has completed its half of the security context
 	and fulfilled its obligations to the other party, the context
 	is complete, but it is not necessarily ready and appropriate
-	for use.  (In some cases the context may be ready for use
-	earlier than this, see <xref target="partial" />.)
-        In particular, the security context
-	flags may not be appropriate for the given application's use.</t>
+	for use.  In particular, the security context
+	flags may not be appropriate for the given application's use.
+	In some cases the context may be ready for use
+	before the negotiation is complete, see <xref target="partial" />.</t>
       <t>The initiator specifies as part of its fixed set of inputs
 	to GSS_Init_sec_context() values for the following booleans:
 	deleg_req_flag, mutual_req_flag, replay_det_req_flag,
@@ -368,7 +367,7 @@
 	  protection from such messages must check the value of the
 	  conf_avail and/or integ_avail output flags from
 	  GSS_Init_sec_context()/GSS_Accept_sec_context() as well as the
-	  conf_state output of GSS_Wrap() (if GSS_Wrap() is used).
+	  conf_state output of GSS_Wrap(), if GSS_Wrap() is used.
 	</t>
       </section>
       <section anchor="extra-token" title="Additional Context Tokens">
@@ -391,8 +390,8 @@
 	  acceptor's implementation does not implement the optional functionality,
 	  but the functionality was requested by the initiator.  In this case,
 	  the acceptor's GSS implementation is required to emit at least one
-	  context token (even when one would not otherwise be needed to complete
-	  the context negotiation), and this can result in an "extra" token.
+	  context token, even when one would not otherwise be needed to complete
+	  the context negotiation, and this can result in an "extra" token.
 	</t>
 	<t>In the rare case when an application receives an extra context token,
 	  GSS_Inquire_context() should be used after processing the extra token
@@ -434,8 +433,8 @@
 	implementations for the token transmission/receipt routines,
 	in order for the program to successfully run when linked against
 	most GSS-API libraries, the initiator will need to
-	specify an explicit target name for the acceptor (which must match
-	the credentials available to the acceptor).  A skeleton for how
+	specify an explicit target name for the acceptor, which must match
+	the credentials available to the acceptor.  A skeleton for how
 	this may be done is provided, using a dummy name.</t>
       <t>This sample code assumes v2 of the GSS-API.  Applications wishing
 	to remain compatible with v1 of the GSS-API may need to perform
