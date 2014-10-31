@@ -161,6 +161,10 @@ do_initiator(int readfd, int writefd, int anon)
     name_buf.length = strlen(name_buf.value);
     major = gss_import_name(&minor, &name_buf,
 			    GSS_C_NT_HOSTBASED_SERVICE, &target_name);
+    if (GSS_ERROR(major)) {
+	warnx(1, "Could not import name\n");
+	goto cleanup;
+    }
 #endif
 
     /* Mutual authentication will require a token from acceptor to
@@ -249,9 +253,6 @@ do_acceptor(int readfd, int writefd)
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
     gss_name_t client_name;
-
-    memset(&input_token, 0, sizeof(input_token));
-    memset(&output_token, 0, sizeof(output_token));
 
     major = GSS_S_CONTINUE_NEEDED;
 
