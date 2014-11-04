@@ -781,6 +781,31 @@ main(void)
 	an error.  Phrased differently, the GSS-API will not generate an
 	error if it is unable to satisfy the features requested by the
 	application.</t>
+      <t>In many cases it is convenient for GSS acceptors to accept
+	security context using multiple acceptor names (such as by
+	using the default credential set, as happens when GSS_C_NO_CREDENTIAL
+	is passed to GSS_Accept_sec_context()).  This allows acceptors
+	to use any credentials to which it has access for accepting
+	security contexts, which may not be the desired behavior for
+	a given application.  (For example, sshd may only wish to accept
+	only using GSS_C_NT_HOSTBASED credentials of the form
+	host@&lt;hostname&gt;, and not nfs@&lt;hostname&gt;.)
+	Acceptor applications can
+	check which target name was used by the initiator, but the details
+	are out of scope for this document.  See <xref target="RFC2743" />
+	sections 2.2.6 and 1.1.5.</t>
+      <t>The C sample code uses the macro GSS_ERROR() to assess the
+	return value of gss_init_sec_context() and gss_accept_sec_context().
+	This is done to indicate where checks are needed in writing
+	code for other languages and what the nature of those checks might
+	be.  The C code could be made simpler by omitting that macro.
+	Use of the GSS_ERROR() macro on the results of GSS-API per-message
+	operations has resulted in security vulnerabilities in existing
+	software!  In applications expecting to receive protected octet
+	streams, this macro should not be used on the result of
+	per-message operations, as it omits checking for supplementary
+	status values such as GSS_S_DUPLICATE_TOKEN, GSS_S_OLD_TOKEN,
+	etc..</t>
     </section>
   </middle>
   <back>
