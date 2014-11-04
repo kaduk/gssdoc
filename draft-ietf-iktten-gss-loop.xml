@@ -399,6 +399,23 @@
 	must destroy the security context and not use the security context
 	for application traffic.
       </t>
+      <section anchor="namecheck" title="Authorization Checks">
+	<t>The acceptor receives as one of the outputs of
+	  GSS_Accpet_sec_context() the name of the initiator which has
+	  authenticated during the security context negotiation.
+	  Applications need to implement authorization checks on this
+	  received name ('client_name' in the sample code) before
+	  providing access to restricted resources.  In particular,
+	  security context negotiation can be successful when the
+	  client is anonymous or is from a different identity realm
+	  than the acceptor, depending on the details of the mechanism
+	  used by the GSS-API to establish the security context.
+	  Acceptor applications can
+	  check which target name was used by the initiator, but the details
+	  are out of scope for this document.  See <xref target="RFC2743" />
+	  sections 2.2.6 and 1.1.5.
+	</t>
+      </section>
       <section anchor="partial"
 	       title="Using Partially Complete Security Contexts">
 	<t>For mechanism/flag combinations that require multiple token
