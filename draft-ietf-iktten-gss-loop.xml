@@ -88,6 +88,36 @@
 	useful for applications but is not mandated by <xref target="RFC2743" />.
       </t>
     </section>
+    <section anchor="reqs" title="Application Protocol Requirements">
+      <t>Part of the purpose of this document is to guide the development
+	of new application protocols using the GSS-API, as well as the
+	development of new application software using such protocols.
+	The following list is features which are necessary or useful
+	in such an application protocol:
+	<list style="hanging">
+	  <t>A way to frame and identify the initial context negotiation
+	    tokens in the loop.</t>
+	  <t>A way to frame and identify subsequent context-level tokens
+	    (e.g., error tokens) after a GSS_S_COMPLETE return.</t>
+	  <t>Failing that, a way to indicate error status from one peer
+	    to the other, possibly accompanied by a descriptive string.</t>
+	  <t>A protocol may use the negotiated GSS security context for
+	    per-message operations; in such cases, the protocol will need
+	    a way to frame and identify those per-message tokens and the
+	    nature of their contents.  For example, a protocol message may
+	    be accompanied by the output of GSS_GetMIC() over that message;
+	    the protocol must identify the location and size of that MIC
+	    token, and indicate that it is a MIC token and what cleartext
+	    it corresponds to.</t>
+	  <t>The application (not the protocol) should provide for
+	    authorization checks in the acceptor.  The GSS-API
+	    authenticates the initiator, but does not make any claim
+	    about whether the initiator is authorized for any given
+	    operation.  In particular, the initiator may be from
+	    a different portion of a federated identity scheme.</t>
+	</list>
+      </t>
+    </section>
     <section anchor="loop" title="Loop Structure">
       <t>The loop is begun by the appropriately named initiator,
 	which calls GSS_Init_sec_context() with an empty (zero-length)
