@@ -244,6 +244,24 @@ cleanup:
     (void)gss_release_name(&minor, &target_name);
 }
 
+/*
+ * Perform authorization checks on the initiator's GSS name object.
+ *
+ * Returns 0 on success (the initiator is authorized) and nonzero
+ * when the initiator is not authorized.
+ */
+static int
+check_authz(gss_name_t *client_name)
+{
+    /*
+     * Supply authorization checking code here.
+     *
+     * Options include bitwise comparison of the exported name against
+     * a local database, and introspection against name attributes.
+     */
+    return 0;
+}
+
 static void
 do_acceptor(int readfd, int writefd)
 {
@@ -311,6 +329,9 @@ do_acceptor(int readfd, int writefd)
 	goto cleanup;
     }
     printf("Acceptor's context negotiation successful\n");
+    ret = check_authz(&client_name);
+    if (ret != 0)
+	printf("Client is not authorized; rejecting access\n");
 cleanup:
     release_buffer(&input_token);
     /* We are required to release storage for nonzero-length output
