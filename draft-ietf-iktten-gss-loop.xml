@@ -8,6 +8,7 @@
 <!ENTITY RFC4462 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4462.xml">
 <!ENTITY RFC4752 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4752.xml">
 <!ENTITY RFC4401 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml">
+<!ENTITY RFC6680 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6680.xml">
 ]>
 <rfc category="info" ipr="trust200902" docName="draft-ietf-kitten-gss-loop-00" submissionType="IETF">
   <front>
@@ -413,7 +414,8 @@
 	  Acceptor applications can
 	  check which target name was used by the initiator, but the details
 	  are out of scope for this document.  See <xref target="RFC2743" />
-	  sections 2.2.6 and 1.1.5.
+	  sections 2.2.6 and 1.1.5.  Additional information can be available
+	  in GSS-API Naming Extensions, <xref target="RFC6680" />.
 	</t>
       </section>
       <section anchor="partial"
@@ -837,6 +839,7 @@ main(void)
       &RFC5801;
       &RFC4752;
       &RFC2203;
+      &RFC6680;
     </references>
     <section title="Acknowledgements">
       <t>Thanks to Nico Williams and Jeff Hutzleman for prompting me to
