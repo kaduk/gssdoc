@@ -429,16 +429,14 @@
 	  before application data is transmitted.  The
 	  prot_ready_state output value from GSS_Init_sec_context() and
 	  GSS_Accept_sec_context() indicates when per-message operations
-	  are available.  Applications using per-message operations
-	  on a partially complete security context should take into
-	  consideration the fact that replay protection is not avaiable
-	  from the GSS-API for those messages, and take the appropriate
-	  protective measures.</t>
-	<t>Applications requiring confidentiality and/or integrity
-	  protection from such messages must check the value of the
-	  conf_avail and/or integ_avail output flags from
-	  GSS_Init_sec_context()/GSS_Accept_sec_context() as well as the
-	  conf_state output of GSS_Wrap(), if GSS_Wrap() is used.
+	  are available.  It is important to note that mutual authenticaton
+	  (if requested) is not guaranteed until GSS_S_COMPLETE is
+	  returned; that is, an attacker could cause messages could be
+	  protected to the attacker instead of the actual target, followed
+	  by a context establishment failure.  Accordingly, application
+	  protocols should not put sensitive information into messages
+	  sent during security context establishment, so the utility
+	  of this functionality may be limited.
 	</t>
       </section>
       <section anchor="extra-token" title="Additional Context Tokens">
