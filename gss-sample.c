@@ -40,8 +40,7 @@ release_buffer(gss_buffer_t buf)
  * If errors are encountered, this routine must not directly cause
  * termination of the process, because compliant GSS applications
  * must release resources allocated by the GSS library before
- * exiting.  (These resources may be non-local to the current
- * process.)
+ * exiting.
  */
 static int
 send_token(int fd, gss_buffer_t token)
@@ -89,8 +88,7 @@ send_token(int fd, gss_buffer_t token)
  * If errors are encountered, this routine must not directly cause
  * termination of the process, because compliant GSS applications
  * must release resources allocated by the GSS library before
- * exiting.  (These resources may be non-local to the current
- * process.)
+ * exiting.
  */
 static int
 receive_token(int fd, gss_buffer_t token)
