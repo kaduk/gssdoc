@@ -53,7 +53,7 @@
 	within which GSS security context tokens are exchanged, which
 	terminates upon successful establishment of a security context
 	or an error condition.  The GSS-API, together with its security
-	mechanisms,  specifies the format and
+	mechanisms, specifies the format and
 	encoding of the context tokens themselves, but the application
 	protocol must specify the necessary framing for the application
 	to determine what octet strings constitute GSS security context
