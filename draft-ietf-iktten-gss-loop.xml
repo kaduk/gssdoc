@@ -421,22 +421,20 @@
       <section anchor="partial"
 	       title="Using Partially Complete Security Contexts">
 	<t>For mechanism/flag combinations that require multiple token
-	  exchanges, an application protocol may find it desirable to
-	  begin sending application data protected with GSS per-message
-	  operations while continuing to exchange security context tokens
-	  to complete the security context negotiation.  For example,
-	  an application may wish to reduce the number of round trips
-	  before application data is transmitted.  The
-	  prot_ready_state output value from GSS_Init_sec_context() and
-	  GSS_Accept_sec_context() indicates when per-message operations
-	  are available.  It is important to note that mutual authenticaton
-	  (if requested) is not guaranteed until GSS_S_COMPLETE is
-	  returned; that is, an attacker could cause messages could be
+	  exchanges, the GSS-API specification <xref target="RFC2743" />
+	  provides a prot_ready_state output value from GSS_Init_sec_context()
+	  and GSS_Accept_sec_context(), which indicates when per-message
+	  operations are available.  However, many mechanism implementations
+	  do not provide this functionality, and the analysis of the
+	  security consequences of its use is rather complicated, so
+	  it is not expected to be useful in most application protocols.</t>
+	<t>In particular, mutual authentication (if requested) is not
+	  guaranteed until GSS_S_COMPLETE is returned.
+	  That is, an attacker could cause messages to be
 	  protected to the attacker instead of the actual target, followed
 	  by a context establishment failure.  Accordingly, application
 	  protocols should not put sensitive information into messages
-	  sent during security context establishment, so the utility
-	  of this functionality may be limited.
+	  sent during security context establishment.
 	</t>
       </section>
       <section anchor="extra-token" title="Additional Context Tokens">
