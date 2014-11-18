@@ -438,34 +438,54 @@
 	</t>
       </section>
       <section anchor="extra-token" title="Additional Context Tokens">
-	<t>Under some (rare) conditions, a context token will be received
+	<t>Under some conditions, a context token will be received
 	  by a party to a security context negotiation after that party has 
 	  completed the negotiation (i.e., after GSS_Init_sec_context()
 	  or GSS_Accept_sec_context() has returned GSS_S_COMPLETE).
 	  Such tokens must be passed to GSS_Process_context_token() for
-	  processing.
+	  processing.  It may not always be necessary for a mechanism
+	  implementation to generate an error token on the intiator side,
+	  or for an initiator application to transmit that token to the
+	  acceptor, but such decisions are out of scope for this document.
+	  Both peers should always be prepared to process such tokens,
+	  and application protocols should provide means by which they
+	  can be transmitted.
 	</t>
-	<t>The most common cause of such tokens is security context deletion
+	<t>Such tokens can be security context deletion
 	  tokens, emitted when the remote party called GSS_Delete_sec_context()
-	  with a non-null output_context_token parameter.  With the GSS-API
-	  version 2, it is not recommended to use security context deletion
-	  tokens.
+	  with a non-null output_context_token parameter, or error tokens,
+	  emitted when the remote party experiences an error processing the
+	  last token in a security context negotiation exchange.
+	  Errors experienced when processing tokens earlier in the
+	  negotiation would be transmitted as normal security context
+	  tokens and processed by GSS_Init_sec_context() or
+	  GSS_Accept_sec_context(), as appropriate.
+	  With the GSS-API version 2, it is not recommended to use
+	  security context deletion tokens, so error tokens are expected
+	  to be the most common form of additional context token, for
+	  new application protocols.
 	</t>
-	<t>Extra security context tokens can also be emitted if the selected
-	  mechanism specifies some functionality (such as per-message
-          confidentiality protection) as optional-to-implement, and the
-	  acceptor's implementation does not implement the optional functionality,
-	  but the functionality was requested by the initiator.  In this case,
-	  the acceptor's GSS implementation is required to emit at least one
-	  context token, even when one would not otherwise be needed to complete
-	  the context negotiation, and this can result in an "extra" token.
-	</t>
-	<t>In the rare case when an application receives an extra context token,
-	  GSS_Inquire_context() should be used after processing the extra token
-	  to re-verify that the context does support the features necessary
-	  for the application protocol.  This will also indicate whether the
-	  token was a deletion token, in which case the major status will be
-	  GSS_S_NO_CONTEXT.
+	<t>GSS_Process_context_token() may indicate an error in its
+	  major_status field if an error is
+	  encountered locally during token processing, or to indicate
+	  that an error was encountered on the peer and conveyed in
+	  an error token.  Regardless of the major_status output of
+	  GSS_Process_context_token(),
+	  GSS_Inquire_context() should be used after processing the extra
+	  token, to query the status of the security context and whether it can
+	  supply the features necessary for the application protocol.</t>
+	<t>At present, all tokens which should be handled by
+	  GSS_Process_context_token() will lead to the security context being
+	  unusable, but future extensions may specify additional context
+	  tokens that leave the security context in a usable state.</t>
+	<t>Regardless of the major status code indicated by
+	  GSS_Process_context_token(), if the security context is no
+	  longer usable for the application protocol (for example,
+	  as would be indicated by a major status code of GSS_S_FAILURE from
+	  GSS_Process_context_token() or a value of FALSE in the output
+	  'open' from GSS_Inquire_context()), the resources associated
+	  with the proto-security-context must be freed with a call to
+	  GSS_Delete_sec_context().
 	</t>
       </section>
     </section>
