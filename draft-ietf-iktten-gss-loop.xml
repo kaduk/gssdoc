@@ -476,16 +476,24 @@
 	  supply the features necessary for the application protocol.</t>
 	<t>At present, all tokens which should be handled by
 	  GSS_Process_context_token() will lead to the security context being
-	  unusable, but future extensions may specify additional context
-	  tokens that leave the security context in a usable state.</t>
-	<t>Regardless of the major status code indicated by
-	  GSS_Process_context_token(), if the security context is no
-	  longer usable for the application protocol (for example,
-	  as would be indicated by a major status code of GSS_S_FAILURE from
-	  GSS_Process_context_token() or a value of FALSE in the output
-	  'open' from GSS_Inquire_context()), the resources associated
-	  with the proto-security-context must be freed with a call to
-	  GSS_Delete_sec_context().
+	  effectively unusable.
+	  Future extensions to the GSS-API may allow for applications
+	  to continue to function after a call to GSS_Process_context_token(),
+	  and it is expected that the outputs of GSS_Inquire_context()
+	  will indicate whether it is safe to do so.  However, since there
+	  are no such extensions at present (error tokens and deletion
+	  tokens both result in the security context being essentially
+	  unusable), there is no guidance to give to applications
+	  regarding this possibility at this time.</t>
+	<t>Even if GSS_Process_context_token() processes an error or deletion
+	  token which renders the context essentially unusable, the
+	  resources associated with the context must eventually be freed
+	  with a call to GSS_Delete_sec_context(), just as would be needed
+	  if GSS_Init_sec_context() or GSS_Accept_sec_context() had
+	  returned an error while processing an input context token and
+	  the input_context_handle was not GSS_C_NO_CONTEXT.  RFC 2743
+	  has some text which is slightly ambiguous in this regard, but
+	  the best practice is to always call GSS_Delete_sec_context().
 	</t>
       </section>
     </section>
