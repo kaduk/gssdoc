@@ -95,11 +95,12 @@
 	development of new application software using such protocols.
 	The following list is features which are necessary or useful
 	in such an application protocol:
-	<list style="hanging">
-	  <t>A way to frame and identify the initial context negotiation
+	<list style="symbols">
+	  <t>A way to frame and identify security context negotiation
 	    tokens in the loop.</t>
-	  <t>A way to frame and identify subsequent context-level tokens
-	    (e.g., error tokens) after a GSS_S_COMPLETE return.</t>
+	  <t>Error tokens should generally also get special framing, as
+	    the recipient may have no other way to distinguish unexpected
+	    error context tokens from per-message tokens.</t>
 	  <t>Failing that, a way to indicate error status from one peer
 	    to the other, possibly accompanied by a descriptive string.</t>
 	  <t>A protocol may use the negotiated GSS security context for
@@ -110,12 +111,13 @@
 	    the protocol must identify the location and size of that MIC
 	    token, and indicate that it is a MIC token and what cleartext
 	    it corresponds to.</t>
-	  <t>The application (not the protocol) should provide for
-	    authorization checks in the acceptor.  The GSS-API
-	    authenticates the initiator, but does not make any claim
-	    about whether the initiator is authorized for any given
-	    operation.  In particular, the initiator may be from
-	    a different portion of a federated identity scheme.</t>
+	  <t>Applications are responsible for authorization of the
+	    authenticated peer principal names which are supplied by
+	    the GSS-API.  Such names are mechanism-specific, and may
+	    come from a different portion of a federated identity
+	    scheme.  Application protocols may need to supply additional
+	    information to support the authorization of access to a
+	    given resource, such as the SSHv2 "username" parameter.</t>
 	</list>
       </t>
     </section>
@@ -428,13 +430,10 @@
 	  do not provide this functionality, and the analysis of the
 	  security consequences of its use is rather complicated, so
 	  it is not expected to be useful in most application protocols.</t>
-	<t>In particular, mutual authentication (if requested) is not
-	  guaranteed until GSS_S_COMPLETE is returned.
-	  That is, an attacker could cause messages to be
-	  protected to the attacker instead of the actual target, followed
-	  by a context establishment failure.  Accordingly, application
-	  protocols should not put sensitive information into messages
-	  sent during security context establishment.
+	<t>In particular, mutual authentication, replay protection, and other
+	  services (if requested) are services which will be active when
+	  GSS_S_COMPLETE is returned, but which are not necessarily active
+	  before the security context is fully established.
 	</t>
       </section>
       <section anchor="extra-token" title="Additional Context Tokens">
@@ -446,7 +445,7 @@
 	  processing.  It may not always be necessary for a mechanism
 	  implementation to generate an error token on the intiator side,
 	  or for an initiator application to transmit that token to the
-	  acceptor, but such decisions are out of scope for this document.
+	  acceptor; such decisions are out of scope for this document.
 	  Both peers should always be prepared to process such tokens,
 	  and application protocols should provide means by which they
 	  can be transmitted.
@@ -469,7 +468,8 @@
 	  major_status field if an error is
 	  encountered locally during token processing, or to indicate
 	  that an error was encountered on the peer and conveyed in
-	  an error token.  Regardless of the major_status output of
+	  an error token.  <xref target="RFC2743E4151" />
+	  Regardless of the major_status output of
 	  GSS_Process_context_token(),
 	  GSS_Inquire_context() should be used after processing the extra
 	  token, to query the status of the security context and whether it can
@@ -862,13 +862,17 @@ main(void)
 	This is done to indicate where checks are needed in writing
 	code for other languages and what the nature of those checks might
 	be.  The C code could be made simpler by omitting that macro.
-	Use of the GSS_ERROR() macro on the results of GSS-API per-message
-	operations has resulted in security vulnerabilities in existing
-	software!  In applications expecting to receive protected octet
+	In applications expecting to receive protected octet
 	streams, this macro should not be used on the result of
 	per-message operations, as it omits checking for supplementary
 	status values such as GSS_S_DUPLICATE_TOKEN, GSS_S_OLD_TOKEN,
-	etc..</t>
+	etc..
+	Use of the GSS_ERROR() macro on the results of GSS-API per-message
+	operations has resulted in security vulnerabilities in existing
+	software!</t>
+      <t>The security considerations from RFCs 2743 and 2744
+	remain applicable to consumers of this document.
+      </t>
     </section>
   </middle>
   <back>
@@ -884,6 +888,18 @@ main(void)
       &RFC4752;
       &RFC2203;
       &RFC6680;
+      <reference anchor="RFC2743E4151">
+	<front>
+	  <title abbrev="E4151">RFC 2743 Errata 4151</title>
+	  <author initials="N." surname="Williams" fullname="Nicolas Williams">
+	    <address>
+	      <email>nico@cryptonector.com</email>
+	    </address>
+	  </author>
+	  <date year="2014" month="November" />
+	</front>
+	<format type="HTML" target="http://www.rfc-editor.org/errata_search.php?rfc=2743&amp;eid=4151" />
+      </reference>
     </references>
     <section title="Acknowledgements">
       <t>Thanks to Nico Williams and Jeff Hutzleman for prompting me to
