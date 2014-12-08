@@ -230,7 +230,7 @@
 	  call to GSS_Init_sec_context(), the initiator must transmit
 	  this token to the acceptor over the application's communication
 	  channel.  If the call to GSS_Init_sec_context() returns an
-	  error token as output_token, it is recommended that the intiator
+	  error token as output_token, it is recommended that the initiator
 	  transmit this token to the acceptor over the application's
 	  communication channel.
 	</t>
@@ -404,7 +404,7 @@
       </t>
       <section anchor="namecheck" title="Authorization Checks">
 	<t>The acceptor receives as one of the outputs of
-	  GSS_Accpet_sec_context() the name of the initiator which has
+	  GSS_Accept_sec_context() the name of the initiator which has
 	  authenticated during the security context negotiation.
 	  Applications need to implement authorization checks on this
 	  received name ('client_name' in the sample code) before
@@ -443,7 +443,7 @@
 	  or GSS_Accept_sec_context() has returned GSS_S_COMPLETE).
 	  Such tokens must be passed to GSS_Process_context_token() for
 	  processing.  It may not always be necessary for a mechanism
-	  implementation to generate an error token on the intiator side,
+	  implementation to generate an error token on the initiator side,
 	  or for an initiator application to transmit that token to the
 	  acceptor; such decisions are out of scope for this document.
 	  Both peers should always be prepared to process such tokens,
@@ -461,7 +461,7 @@
 	  GSS_Accept_sec_context(), as appropriate.
 	  With the GSS-API version 2, it is not recommended to use
 	  security context deletion tokens, so error tokens are expected
-	  to be the most common form of additional context token, for
+	  to be the most common form of additional context token for
 	  new application protocols.
 	</t>
 	<t>GSS_Process_context_token() may indicate an error in its
@@ -835,7 +835,7 @@ main(void)
 	are security-relevant considerations throughout the document.
 	It is useful to call out a few things in this section, though.</t>
       <t>The GSS-API uses a request-and-check model for features.  An
-	application using the GSS-API requests that certain features
+	application using the GSS-API requests certain features
 	(confidentiality protection for messages, or anonymity), but
 	such a request does not require the GSS implementation to provide
 	that feature.  The application must check the returned flags to
@@ -845,7 +845,7 @@ main(void)
 	error if it is unable to satisfy the features requested by the
 	application.</t>
       <t>In many cases it is convenient for GSS acceptors to accept
-	security context using multiple acceptor names (such as by
+	security contexts using multiple acceptor names (such as by
 	using the default credential set, as happens when GSS_C_NO_CREDENTIAL
 	is passed to GSS_Accept_sec_context()).  This allows acceptors
 	to use any credentials to which it has access for accepting
