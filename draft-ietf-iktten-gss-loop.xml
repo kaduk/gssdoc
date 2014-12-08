@@ -689,7 +689,7 @@ do_initiator(int readfd, int writefd, int anon)
             warnx("major not complete or continue but not error\n");
             goto cleanup;
         }
-    }	/* while(!initiator_established) */
+    }	/* while (!initiator_established) */
     if ((ret_flags & req_flags) != req_flags) {
         warnx("Negotiated context does not support requested flags\n");
         goto cleanup;
@@ -713,7 +713,7 @@ cleanup:
  * when the initiator is not authorized.
  */
 static int
-check_authz(gss_name_t *client_name)
+check_authz(gss_name_t client_name)
 {
     /*
      * Supply authorization checking code here.
@@ -736,7 +736,7 @@ do_acceptor(int readfd, int writefd)
 
     major = GSS_S_CONTINUE_NEEDED;
 
-    while(!acceptor_established) {
+    while (!acceptor_established) {
         if (major & GSS_S_CONTINUE_NEEDED) {
             ret = receive_token(readfd, &input_token);
             if (ret != 0)
@@ -785,13 +785,13 @@ do_acceptor(int readfd, int writefd)
          * from gss_accept_sec_context(), even if there is no storage
          * associated with that buffer. */
         (void)gss_release_buffer(&minor, &output_token);
-    }	/* while(!acceptor_established) */
+    }	/* while (!acceptor_established) */
     if (!(ret_flags & GSS_C_INTEG_FLAG)) {
         warnx("Negotiated context does not support integrity\n");
         goto cleanup;
     }
     printf("Acceptor's context negotiation successful\n");
-    ret = check_authz(&client_name);
+    ret = check_authz(client_name);
     if (ret != 0)
         printf("Client is not authorized; rejecting access\n");
 cleanup:
