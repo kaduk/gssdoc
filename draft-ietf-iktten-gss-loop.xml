@@ -10,6 +10,8 @@
 <!ENTITY RFC4401 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.4401.xml">
 <!ENTITY RFC6680 SYSTEM "http://xml.resource.org/public/rfc/bibxml/reference.RFC.6680.xml">
 ]>
+<?rfc toc="yes"?>
+<?rfc tocdepth="2"?>
 <rfc category="info" ipr="trust200902" docName="draft-ietf-kitten-gss-loop-02" submissionType="IETF">
   <front>
     <title>Structure of the GSS Negotiation Loop</title>
