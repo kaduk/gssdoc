@@ -163,7 +163,7 @@
 	  input_context_handle for the current proto-security-context
 	  and its fixed set of input parameters, and the input_token
 	  received from the acceptor (if not the first iteration of
-	  the loop).  The presence of a nonempty output_token and the
+	  the loop).  The presence or absence of a nonempty output_token and the
 	  value of the major status code are the indicators for how to
 	  proceed:
 	  <list style="symbols">
@@ -279,7 +279,8 @@
 	<t>The GSS acceptor calls GSS_Accept_sec_context(), using the
 	  input_context_handle for the current proto-security-context
 	  and the input_token received from the initiator.
-	  The presence of a nonempty output_token and the value of the
+	  The presence or absence of a nonempty output_token
+	  and the value of the
 	  major status code are the indicators for how to proceed:
 	  <list style="symbols">
 	    <t>If the major status code is GSS_S_COMPLETE and the
