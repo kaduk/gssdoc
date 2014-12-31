@@ -12,7 +12,7 @@
 ]>
 <?rfc toc="yes"?>
 <?rfc tocdepth="2"?>
-<rfc category="info" ipr="trust200902" docName="draft-ietf-kitten-gss-loop-02" submissionType="IETF">
+<rfc category="info" ipr="trust200902" docName="draft-ietf-kitten-gss-loop-03" submissionType="IETF">
   <front>
     <title>Structure of the GSS Negotiation Loop</title>
     <author initials="B." surname="Kaduk" fullname="Benjamin Kaduk">
