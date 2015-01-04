@@ -830,6 +830,9 @@ main(void)
 	</t>
       </section>
     </section>
+    <section title="IANA Considerations">
+      <t>This document makes no request of IANA.</t>
+    </section>
     <section title="Security Considerations">
       <t>This document provides a (reasonably) concise description and
 	example for correct construction of the GSS-API security context
