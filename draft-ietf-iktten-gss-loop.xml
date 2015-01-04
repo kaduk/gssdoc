@@ -887,8 +887,8 @@ main(void)
       &RFC2744;
     </references>
     <references title="Informational References">
-      &RFC4462;
       &RFC4401;
+      &RFC4462;
       &RFC3645;
       &RFC5801;
       &RFC4752;
