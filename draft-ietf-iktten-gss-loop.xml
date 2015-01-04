@@ -471,7 +471,7 @@
 	  major_status field if an error is
 	  encountered locally during token processing, or to indicate
 	  that an error was encountered on the peer and conveyed in
-	  an error token.  <xref target="RFC2743E4151" />
+	  an error token.  See <xref target="RFC2743" /> Errata #4151.
 	  Regardless of the major_status output of
 	  GSS_Process_context_token(),
 	  GSS_Inquire_context() should be used after processing the extra
@@ -891,18 +891,6 @@ main(void)
       &RFC4752;
       &RFC2203;
       &RFC6680;
-      <reference anchor="RFC2743E4151">
-	<front>
-	  <title abbrev="E4151">RFC 2743 Errata 4151</title>
-	  <author initials="N." surname="Williams" fullname="Nicolas Williams">
-	    <address>
-	      <email>nico@cryptonector.com</email>
-	    </address>
-	  </author>
-	  <date year="2014" month="November" />
-	</front>
-	<format type="HTML" target="http://www.rfc-editor.org/errata_search.php?rfc=2743&amp;eid=4151" />
-      </reference>
     </references>
     <section title="Acknowledgements">
       <t>Thanks to Nico Williams and Jeff Hutzleman for prompting me to
