@@ -249,7 +249,7 @@
 	  an error condition indicating that the initiator's state is invalid.
 	  See <xref target="extra-token" /> for some exceptional cases.
 	  It is likely appropriate for the acceptor to report this error
-	  condition to the acceptor via the application's communication
+	  condition to the initiator via the application's communication
 	  channel.</t>
 	<t>If the acceptor is expecting a context token (e.g., if the
 	  previous call to GSS_Accept_sec_context() returned
