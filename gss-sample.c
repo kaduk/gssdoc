@@ -41,6 +41,8 @@ release_buffer(gss_buffer_t buf)
  * termination of the process, because compliant GSS applications
  * must release resources allocated by the GSS library before
  * exiting.
+ *
+ * Returns 0 on success, non-zero on failure.
  */
 static int
 send_token(int fd, gss_buffer_t token)
@@ -89,6 +91,8 @@ send_token(int fd, gss_buffer_t token)
  * termination of the process, because compliant GSS applications
  * must release resources allocated by the GSS library before
  * exiting.
+ *
+ * Returns 0 on success, non-zero on failure.
  */
 static int
 receive_token(int fd, gss_buffer_t token)
