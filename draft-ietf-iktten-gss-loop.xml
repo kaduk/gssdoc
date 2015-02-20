@@ -12,7 +12,7 @@
 ]>
 <?rfc toc="yes"?>
 <?rfc tocdepth="2"?>
-<rfc category="info" ipr="trust200902" docName="draft-ietf-kitten-gss-loop-04" submissionType="IETF">
+<rfc category="info" ipr="trust200902" docName="draft-ietf-kitten-gss-loop-05" submissionType="IETF">
   <front>
     <title>Structure of the GSS Negotiation Loop</title>
     <author initials="B." surname="Kaduk" fullname="Benjamin Kaduk">
@@ -21,7 +21,7 @@
         <email>kaduk@mit.edu</email>
       </address>
     </author>
-    <date month="January" year="2015"/>
+    <date month="February" year="2015"/>
     <abstract>
       <t>This document specifies the generic structure of the negotiation
 	loop to establish a GSS security context between initiator and
