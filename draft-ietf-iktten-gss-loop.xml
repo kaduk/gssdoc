@@ -160,9 +160,9 @@
       </section>
       <section anchor="initiator" title="GSS_Init_sec_context">
 	<t>The initiator calls GSS_Init_sec_context(), using the
-	  input_context_handle for the current proto-security-context
+	  input_context_handle for the current security context being established
 	  and its fixed set of input parameters, and the input_token
-	  received from the acceptor (if not the first iteration of
+	  received from the acceptor (if this is not the first iteration of
 	  the loop).  The presence or absence of a nonempty output_token and the
 	  value of the major status code are the indicators for how to
 	  proceed:
@@ -186,7 +186,8 @@
 	      output_token is empty, the mechanism has produced an
 	      output which is not compliant with <xref target="RFC2743" />.
 	      However, there are some known implementations of certain
-	      mechanisms which do produce empty context negotiation
+	      mechanisms such as NTLMSSP <xref target="NTLMSSP" />
+	      which do produce empty context negotiation
 	      tokens.  For maximum interoperability, applications should
 	      be prepared to accept such tokens, and should transmit them
 	      to the acceptor if they are generated.</t>
@@ -277,7 +278,7 @@
 	  the chan_bindings argument should also remain fixed for
 	  reliable operation.</t>
 	<t>The GSS acceptor calls GSS_Accept_sec_context(), using the
-	  input_context_handle for the current proto-security-context
+	  input_context_handle for the current security context being established
 	  and the input_token received from the initiator.
 	  The presence or absence of a nonempty output_token
 	  and the value of the
@@ -302,7 +303,8 @@
 	      output_token is empty, the mechanism has produced an
 	      output which is not compliant with <xref target="RFC2743" />.
 	      However, there are some known implementations of certain
-	      mechanisms which do produce empty context negotiation
+	      mechanisms such as NTLMSSP <xref target="NTLMSSP" />
+	      which do produce empty context negotiation
 	      tokens.  For maximum interoperability, applications should
 	      be prepared to accept such tokens, and should transmit them
 	      to the initiator if they are generated.</t>
@@ -893,6 +895,16 @@ main(void)
       &RFC5801;
       &RFC4752;
       &RFC2203;
+      <reference anchor="NTLMSSP">
+	<front>
+	  <title abbrev="NTLM Authentication Protocol">[MS-NLMP]: NT LAN Manager (NTLM) Authentication Protocol</title>
+	  <author>
+	    <organization>Microsoft Corporation</organization>
+	  </author>
+	  <date year="2014" month="May" />
+	</front>
+	<format type="HTML" target="https://msdn.microsoft.com/en-us/library/cc236621.aspx" />
+      </reference>
       &RFC6680;
     </references>
     <section title="Acknowledgements">
